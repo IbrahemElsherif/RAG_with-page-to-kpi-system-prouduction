@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة النظام | Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Cairo', sans-serif;
+            color: #343a40;
+        }
+
+        /* الشريط العلوي */
+        .navbar {
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* البطاقات */
+        .control-card {
+            background: white;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .control-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .card-header-custom {
+            padding: 20px;
+            font-weight: 700;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* ألوان الهيدر */
+        .status-header .header-icon { background-color: #e3f2fd; color: #0d47a1; }
+        .db-header .header-icon { background-color: #e8f5e9; color: #1b5e20; }
+
+        /* مؤشر النبض (Pulsing Light) */
+        .status-indicator {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            box-shadow: 0 0 0 rgba(0,0,0,0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border: 5px solid #badbcc;
+        }
+
+        .status-maintenance {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 5px solid #f5c2c7;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(25, 135, 84, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+
+        /* الإحصائيات */
+        .stat-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px dashed #dee2e6;
+        }
+        .stat-number { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
+        .stat-label { font-size: 0.9rem; color: #6c757d; }
+
+        /* منطقة الرفع */
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background-color: #fafbfc;
+            transition: all 0.3s;
+        }
+        .upload-area:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark mb-5">
+        <div class="container">
+            <span class="navbar-brand"><i class="fas fa-cogs me-2"></i> لوحة تحكم النظام (Admin Console)</span>
+            <a href="/admin/kpi" class="btn btn-light btn-sm fw-bold text-primary shadow-sm">
+                <i class="fas fa-chart-line me-1"></i> الذهاب للإحصائيات
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row g-4">
+            
+            <div class="col-lg-6">
+                <div class="control-card status-header">
+                    <div class="card-header-custom">
+                        <div class="header-icon"><i class="fas fa-power-off"></i></div>
+                        <div>حالة النظام (System Status)</div>
+                    </div>
+                    <div class="card-body text-center p-5">
+                        
+                        {% if is_maintenance %}
+                            <div class="status-indicator status-maintenance">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h3 class="fw-bold text-danger mb-2">النظام مغلق</h3>
+                            <p class="text-muted mb-4">الموقع في وضع الصيانة حالياً، لا يمكن للطلاب الاستخدام.</p>
+                        {% else %}
+                            <div class="status-indicator status-active">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <h3 class="fw-bold text-success mb-2">النظام يعمل</h3>
+                            <p class="text-muted mb-4">الموقع متاح ويستقبل طلبات الطلاب بشكل طبيعي.</p>
+                        {% endif %}
+
+                        <form action="/admin/toggle-maintenance" method="post">
+                            {% if is_maintenance %}
+                                <input type="hidden" name="state" value="off">
+                                <button type="submit" class="btn btn-success btn-action shadow">
+                                    <i class="fas fa-play me-2"></i> إعادة تشغيل النظام
+                                </button>
+                            {% else %}
+                                <input type="hidden" name="state" value="on">
+                                <button type="submit" class="btn btn-danger btn-action shadow">
+                                    <i class="fas fa-pause me-2"></i> إيقاف للصيانة
+                                </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="control-card db-header">
+                    <div class="card-header-custom">
+                        <div class="header-icon"><i class="fas fa-database"></i></div>
+                        <div>قاعدة المعرفة (Knowledge Base)</div>
+                    </div>
+                    <div class="card-body p-4">
+                        
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <div class="stat-box">
+                                    <div class="stat-number">{{ db_stats.total_documents }}</div>
+                                    <div class="stat-label">مستند (Chunks)</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-box">
+                                    {% if db_stats.status == 'Connected' %}
+                                        <div class="stat-number text-success"><i class="fas fa-link"></i></div>
+                                        <div class="stat-label text-success">متصل بنجاح</div>
+                                    {% else %}
+                                        <div class="stat-number text-danger"><i class="fas fa-unlink"></i></div>
+                                        <div class="stat-label text-danger">غير متصل</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-3 text-muted">تحديث البيانات:</h6>
+                        <form action="/admin/upload-db" method="post" enctype="multipart/form-data">
+                            <div class="upload-area mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3 opacity-50"></i>
+                                <p class="mb-2">اسحب ملف <code>chroma_db.zip</code> هنا</p>
+                                <input type="file" name="file" class="form-control" accept=".zip" required>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                                    <i class="fas fa-sync-alt me-2"></i> بدء التحديث
+                                </button>
+                            </div>
+                            <small class="text-muted mt-2 d-block text-center">
+                                <i class="fas fa-info-circle me-1"></i> سيتم تحويل النظام لوضع الصيانة تلقائياً أثناء الرفع.
+                            </small>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+        </div> <footer class="text-center mt-5 text-muted">
+            <small>&copy;  المعهد السعودي العالي المتخصص للتدريب   </small>
+        </footer>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

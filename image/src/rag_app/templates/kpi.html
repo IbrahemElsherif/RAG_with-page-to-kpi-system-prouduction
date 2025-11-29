@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مؤشرات الأداء | KPI Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Cairo', sans-serif;
+            color: #495057;
+        }
+
+        /* تنسيق الناف بار */
+        .navbar {
+            background: linear-gradient(to right, #2c3e50, #4ca1af);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: white !important;
+        }
+
+        /* تنسيق البطاقات (Cards) */
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon-bg {
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            font-size: 8rem;
+            opacity: 0.1;
+            transform: rotate(-15deg);
+        }
+
+        .card-body {
+            padding: 2rem;
+            z-index: 1;
+            position: relative;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0;
+            line-height: 1.2;
+        }
+
+        .stat-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+
+        /* ألوان البطاقات */
+        .card-blue { background: linear-gradient(45deg, #4099ff, #73b4ff); color: white; }
+        .card-dark { background: linear-gradient(45deg, #2c3e50, #4b6cb7); color: white; }
+        .card-performance-good { background: linear-gradient(45deg, #2ed8b6, #59e0c5); color: white; }
+        .card-performance-bad { background: linear-gradient(45deg, #ff5370, #ff869a); color: white; }
+        .bg-warning.text-dark { background: #ffc107 !important; color: #212529 !important; }
+
+        /* تنسيق الجدول */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-top: 2rem;
+        }
+
+        .table thead th {
+            border-bottom: 2px solid #f0f0f0;
+            color: #888;
+            font-weight: 600;
+            padding-bottom: 15px;
+        }
+
+        .table tbody td {
+            vertical-align: middle;
+            padding: 15px 10px;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .badge-time {
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark mb-5">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-pie me-2"></i> فريق الذكاء الاصطناعي - KPI System
+            </a>
+            <div class="d-flex gap-2">
+                <a href="/admin/maintenance" class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">
+                    <i class="fas fa-cogs me-1"></i> صفحة الصيانة
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1 text-dark">لوحة القياس والتحليل</h2>
+                <p class="text-muted mb-0">نظرة شاملة على أداء المساعد الذكي</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 mt-md-0">
+                <a href="/admin/full-report" target="_blank" class="btn btn-dark btn-action shadow-sm">
+                    <i class="fas fa-print me-2"></i> معاينة التقرير
+                </a>
+                <a href="/admin/full-report?download=true" class="btn btn-primary btn-action shadow-sm">
+                    <i class="fas fa-code me-2"></i> حفظ (HTML)
+                </a>
+                <a href="/admin/export-csv" class="btn btn-success btn-action shadow-sm">
+                    <i class="fas fa-file-excel me-2"></i> تصدير (Excel)
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card card-blue">
+                    <i class="fas fa-comments card-icon-bg"></i>
+                    <div class="card-body">
+                        <div class="stat-title">إجمالي المحادثات</div>
+                        <div class="stat-value">{{ total_chats }}</div>
+                        <div class="stat-desc">سؤال وجواب تم تسجيلهم</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card card-dark">
+                    <i class="fas fa-history card-icon-bg"></i>
+                    <div class="card-body">
+                        <div class="stat-title">المتوسط التاريخي</div>
+                        <div class="stat-value">{{ avg_speed_all }} <span class="fs-4">ث</span></div>
+                        <div class="stat-desc">متوسط سرعة الرد منذ البداية</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card {% if avg_speed_last_10 < 5.5 %}card-performance-good{% elif avg_speed_last_10 < 7.0 %}bg-warning text-dark{% else %}card-performance-bad{% endif %}">
+                    <i class="fas fa-tachometer-alt card-icon-bg"></i>
+                    <div class="card-body">
+                        <div class="stat-title">الأداء الحالي (النبض)</div>
+                        <div class="stat-value">{{ avg_speed_last_10 }} <span class="fs-4">ث</span></div>
+                        <div class="stat-desc">
+                            متوسط آخر 10 أسئلة
+                            {% if avg_speed_last_10 < 5.5 %}
+                                <span class="badge bg-white text-success ms-2 px-2 rounded-pill">سريع 🚀</span>
+                            {% elif avg_speed_last_10 < 7.0 %}
+                                <span class="badge bg-dark text-warning ms-2 px-2 rounded-pill">متوسط 👌</span>
+                            {% else %}
+                                <span class="badge bg-white text-danger ms-2 px-2 rounded-pill">بطيء 🐢</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold m-0"><i class="fas fa-list-ul me-2 text-primary"></i> سجلات المحادثات</h5>
+                <span class="badge bg-light text-dark border">آخر 50 محادثة</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th width="5%">#</th>
+                            <th width="15%">التوقيت</th>
+                            <th width="35%">سؤال المستخدم</th>
+                            <th width="20%">إجابة النظام</th>
+                            <th width="10%">السرعة</th>
+                            <th width="15%">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr id="row-{{ log.id }}">
+                            <td><span class="fw-bold text-dark">{{ loop.index }}</span></td>
+
+                            <td>
+                                <div class="fw-bold text-dark">{{ log.timestamp.strftime('%Y-%m-%d') }}</div>
+                                <div class="small text-muted">{{ log.timestamp.strftime('%H:%M:%S') }}</div>
+                            </td>
+
+                            <td>
+                                <div class="text-truncate" style="max-width: 250px;" title="{{ log.user_query }}">
+                                    {{ log.user_query }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="text-muted text-truncate" style="max-width: 200px;">
+                                    {{ log.bot_answer }}
+                                </div>
+                            </td>
+
+                            <td>
+                                {% if log.response_time < 5.5 %}
+                                    <span class="badge bg-success badge-time">{{ "%.2f"|format(log.response_time) }}s</span>
+                                {% elif log.response_time < 7.0 %}
+                                    <span class="badge bg-warning text-dark badge-time">{{ "%.2f"|format(log.response_time) }}s</span>
+                                {% else %}
+                                    <span class="badge bg-danger badge-time">{{ "%.2f"|format(log.response_time) }}s</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a href="/admin/kpi/{{ log.id }}" class="btn btn-outline-primary btn-sm rounded-pill px-3" title="التفاصيل">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <button onclick="deleteLog({{ log.id }})" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-1" title="حذف السجل">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="text-center mt-4 text-muted small">
+            &copy; 2025 المعهد السعودي العالي المتخصص للتدريب - جميع الحقوق محفوظة
+        </div>
+    </div>
+
+    <script>
+        async function deleteLog(logId) {
+            if (!confirm("هل أنت متأكد من رغبتك في حذف هذا السجل نهائياً؟")) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/kpi/delete/${logId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    const row = document.getElementById(`row-${logId}`);
+                    row.style.transition = "all 0.5s ease";
+                    row.style.opacity = "0";
+                    setTimeout(() => {
+                        row.remove();
+                        // إعادة تحميل الصفحة ضروري لإعادة ترتيب الأرقام التسلسلية
+                        location.reload();
+                    }, 500);
+                } else {
+                    alert("فشل الحذف. ربما السجل غير موجود.");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("حدث خطأ في الاتصال بالسيرفر.");
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

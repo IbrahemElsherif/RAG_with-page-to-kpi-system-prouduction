@@ -1,6 +1,5 @@
 .env
-chroma_db
+image\src\data\chroma_db
 __pycache__
-requirements.txt
 RAG_prouduction
 command.txt

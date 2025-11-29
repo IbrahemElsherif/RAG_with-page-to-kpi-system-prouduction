@@ -1,0 +1,8 @@
+RAG_prouduction
+__pycache__
+*.pyc
+.git
+.env
+temp.zip
+*.db
+kpi_data.db

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>التقرير الشامل للمحادثات</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .report-header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #333; }
+        .chat-entry { border: 1px solid #ddd; margin-bottom: 30px; page-break-inside: avoid; border-radius: 8px; overflow: hidden; }
+        .entry-header { background-color: #f8f9fa; padding: 10px 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; font-weight: bold; color: #555; }
+        .entry-body { padding: 20px; }
+        .q-box { margin-bottom: 15px; }
+        .a-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-right: 4px solid #28a745; white-space: pre-wrap; }
+        .label { color: #0d6efd; font-weight: bold; margin-bottom: 5px; display: block; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            .chat-entry { border: 1px solid #ccc; }
+            body { padding: 0; margin: 0; }
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="container">
+        <div class="d-flex justify-content-between mb-4 no-print">
+            <a href="/admin/kpi" class="btn btn-secondary">← عودة للوحة التحكم</a>
+            <button onclick="window.print()" class="btn btn-primary btn-lg"> طباعه التقرير pdf </button>
+        </div>
+
+        <div class="report-header">
+            <h1>سجل المحادثات الكامل</h1>
+            <p>المعهد السعودي المتخصص العالي للتدريب</p>
+            <small>تاريخ استخراج التقرير: {{ generated_at.strftime('%Y-%m-%d %H:%M') }}</small>
+            <br>
+            <small>إجمالي المحادثات: {{ logs|length }}</small>
+        </div>
+
+        {% for log in logs %}
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #{{ loop.revindex }}</span>
+                <span>{{ log.timestamp.strftime('%Y-%m-%d | %H:%M') }}</span>
+                <span>السرعة: {{ "%.2f"|format(log.response_time) }}s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">{{ log.user_query }}</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    {{ log.bot_answer }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</body>
+</html>
