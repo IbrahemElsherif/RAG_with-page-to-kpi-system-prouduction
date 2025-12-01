@@ -32,8 +32,8 @@ import csv
 
 load_dotenv()
 
-ADMIN_USER = os.getenv("ADMIN_USER")
-ADMIN_PASS = os.getenv("ADMIN_PASS")
+ADMIN_USER = os.getenv("ADMIN_USER") or "admin"
+ADMIN_PASS = os.getenv("ADMIN_PASS") or "admin1234"
 # table creation
 models.Base.metadata.create_all(bind=engine)
 
