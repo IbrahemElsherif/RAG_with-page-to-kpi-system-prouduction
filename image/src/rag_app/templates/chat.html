@@ -13,6 +13,8 @@
         .bot-message { align-self: flex-end; background-color: #e9ecef; color: #333; border-bottom-left-radius: 2px; }
         .input-area { background: white; padding: 20px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
         .loading { font-style: italic; color: #888; font-size: 0.9em; display: none;}
+        /* تحسين شكل الروابط */
+        .bot-message a { color: #0056b3; font-weight: bold; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -24,74 +26,13 @@
     </div>
 
     <div class="input-area">
-        <input type="text" id="userInput" class="form-control" placeholder="اكتب سؤالك هنا..." onkeypress="handleEnter(event)">
-        <button onclick="sendMessage()" class="btn btn-primary px-4">إرسال</button>
+        <input type="text" id="userInput" class="form-control" placeholder="اكتب سؤالك هنا...">
+        
+        <button id="sendBtn" onclick="sendMessage()" class="btn btn-primary px-4">إرسال</button>
     </div>
 
-    <script>
-        const chatBox = document.getElementById('chatBox');
-        const userInput = document.getElementById('userInput');
-        let chatHistory = []; // لتخزين تاريخ المحادثة محلياً وإرساله مع كل طلب
-
-        function handleEnter(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
-
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
-
-            // 1. عرض رسالة المستخدم
-            appendMessage(text, 'user-message');
-            userInput.value = '';
-            
-            // 2. إنشاء مكان لرد البوت
-            const botMsgDiv = document.createElement('div');
-            botMsgDiv.className = 'message bot-message';
-            botMsgDiv.innerText = '...'; // مؤشر الكتابة
-            chatBox.appendChild(botMsgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            try {
-                // 3. إرسال الطلب للسيرفر
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text, history: chatHistory })
-                });
-
-                // 4. استقبال الرد (Streaming)
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-                botMsgDiv.innerText = ""; // مسح المؤشر
-                let fullBotResponse = "";
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    
-                    const chunk = decoder.decode(value, { stream: true });
-                    fullBotResponse += chunk;
-                    botMsgDiv.innerText += chunk; // إضافة النص تدريجياً
-                    chatBox.scrollTop = chatBox.scrollHeight; // النزول للأسفل تلقائياً
-                }
-
-                // 5. تحديث التاريخ
-                chatHistory.push([text, fullBotResponse]);
-
-            } catch (error) {
-                botMsgDiv.innerText = "عذراً، حدث خطأ في الاتصال.";
-                botMsgDiv.style.color = "red";
-            }
-        }
-
-        function appendMessage(text, className) {
-            const div = document.createElement('div');
-            div.className = `message ${className}`;
-            div.innerText = text;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+    <script src="/static/js/chat.js"></script>
 </body>
 </html>
