@@ -1,53 +1,66 @@
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_chroma import Chroma
+from dotenv import load_dotenv
+
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, Depends, HTTPException, status, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
-from mangum import Mangum
-from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from chromadb.config import Settings
+
 from sqlalchemy.orm import Session
+import io
+from database import engine, SessionLocal, get_db
+import models
+
 from pydantic import BaseModel
-import asyncio
-import time
 from datetime import datetime
 from typing import List, Tuple, Optional
+from pathlib import Path
+import asyncio
+import time
 import os
 import shutil
 import zipfile
 import secrets
 import csv
-import io
-
-# --- استيراد ملفات قاعدة البيانات (SQLite) ---
-from database import engine, SessionLocal, get_db
-import models
-
-# إنشاء الجداول
-models.Base.metadata.create_all(bind=engine)
-
-# --- مكتبات RAG ---
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_chroma import Chroma
-from dotenv import load_dotenv
 
 
 
 load_dotenv()
 
-# Fix 1: Make BASE_DIR dynamic (This is already correct in your code, keep it)
+ADMIN_USER = os.getenv("ADMIN_USER")
+ADMIN_PASS = os.getenv("ADMIN_PASS")
+# table creation
+models.Base.metadata.create_all(bind=engine)
+
+
+# Make BASE_DIR dynamic 
 BASE_DIR = Path(__file__).resolve().parent 
-
-# Fix 2: Update TEMPLATES_DIR (This is also correct, keep it)
+print(BASE_DIR)
+# Update TEMPLATES_DIR 
 TEMPLATES_DIR = BASE_DIR / "templates"
-
-# Fix 3: CRITICAL CHANGE - Fix CHROMA_PATH
-# Old code: CHROMA_PATH = r"image\src\data\chroma_db"
-# New code: Point to the chroma_db folder inside your app directory
+#  Point to the chroma_db folder inside your app directory
 CHROMA_PATH = BASE_DIR / "chroma_db"
 COLLECTION_NAME = "example_collection" 
-MAINTENANCE_MODE = False # المتغير المتحكم في حالة النظام
+MAINTENANCE_MODE = False # 
+
 security = HTTPBasic()
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+app = FastAPI(title="RAG API Final System")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace "*" with your website URL (e.g. "https://myschool.com")
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 print("--- [INFO] Loading models... ---")
 embeddings_model = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -62,6 +75,7 @@ def load_vector_store():
             collection_name=COLLECTION_NAME,
             embedding_function=embeddings_model,
             persist_directory=str(CHROMA_PATH), 
+            client_settings=Settings(anonymized_telemetry=False)
         )
         print("--- [INFO] Vector store loaded. ---")
     else:
@@ -83,8 +97,8 @@ def get_chroma_stats():
 
 # --- دوال الحماية (Admin Auth) ---
 def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
-    correct_username = secrets.compare_digest(credentials.username, "admin")
-    correct_password = secrets.compare_digest(credentials.password, "admin123")
+    correct_username = secrets.compare_digest(credentials.username, ADMIN_USER)
+    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASS)
     if not (correct_username and correct_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -97,17 +111,8 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
 class ChatRequest(BaseModel):
     message: str
     history: Optional[List[Tuple[str, str]]] = [] 
-from fastapi.middleware.cors import CORSMiddleware
-app = FastAPI(title="RAG API Final System")
-handler = Mangum(app)  # Entry point for AWS Lambda.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace "*" with your website URL (e.g. "https://myschool.com")
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-# --- منطق الذكاء (RAG Logic) ---
+
+# --- (RAG Logic) ---
 
 def prepare_rag_context(message: str, history: List[Tuple[str, str]]):
     if not vector_store:
@@ -182,7 +187,7 @@ async def generate_response_stream(message: str, history: List[Tuple[str, str]],
     rag_prompt, search_query, docs, _ = prepare_rag_context(message, history)
     
     full_answer = ""
-    first_token_time = None # متغير لحفظ زمن أول حرف
+    first_token_time = None 
     
     if not rag_prompt:
         err_msg = "عذراً، قاعدة البيانات غير جاهزة."
@@ -203,7 +208,7 @@ async def generate_response_stream(message: str, history: List[Tuple[str, str]],
                     full_answer += chunk.content
                     yield chunk.content
             
-            # 3. نحدد زمن الرد للحفظ: TTFT إن وُجد، وإلا الزمن الكلي
+            # calculate TTFT time
             response_time_to_log = first_token_time if first_token_time is not None else (time.time() - start_time)
 
         except Exception as e:
@@ -234,6 +239,9 @@ async def chat_page(request: Request):
         return templates.TemplateResponse("user_maintenance.html", {"request": request})
     return templates.TemplateResponse("chat.html", {"request": request})
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
 # 2. الـ Chat API
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
