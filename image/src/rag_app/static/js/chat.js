@@ -1,176 +1,100 @@
-// ==========================================
-// تعريف العناصر (مع حماية ضد العدم null)
-// ==========================================
-const chatBox = document.getElementById('chatBox');
-const userInput = document.getElementById('userInput');
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const typingIndicator = document.getElementById('typingIndicator');
 
-// محاولة العثور على الزر سواء بالـ ID أو بالكلاس كاحتياط
-const sendBtn = document.getElementById('sendBtn') || document.querySelector('button.btn-primary');
+    const sessionId = "sess_" + Date.now().toString(36) + "_" + Math.random().toString(36).substr(2, 9);
+    let chatHistory = []; 
 
-let chatHistory = []; 
+    function scrollToBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-// ==========================================
-// إعدادات DOMPurify (لفتح الروابط وحمايتها)
-// ==========================================
-if (typeof DOMPurify !== 'undefined') {
-    DOMPurify.addHook('afterSanitizeAttributes', function (node) {
-        // التحقق من أن العنصر هو رابط
-        if (node.tagName && node.tagName.toLowerCase() === 'a') {
-            let href = node.getAttribute('href') || '';
+    function createMessageElement(sender) {
+        const div = document.createElement('div');
+        div.className = `message ${sender}-message`;
+        // إضافة الرسالة قبل المؤشر
+        chatBox.insertBefore(div, typingIndicator);
+        return div;
+    }
 
-            // إذا الرابط فارغ، نلغي فعاليته
-            if (!href) {
-                node.setAttribute('href', 'javascript:void(0)');
-                node.style.pointerEvents = 'none'; // منع النقر
-                node.style.color = '#6c757d'; // لون رمادي
-                node.style.textDecoration = 'none';
-                return;
-            }
+    function appendUserMessage(text) {
+        const div = createMessageElement('user');
+        div.textContent = text;
+        scrollToBottom();
+    }
 
-            // إضافة https إذا لم يكن موجوداً (للروابط الخارجية)
-            if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href)) {
-                if (!href.startsWith('/') && !href.startsWith('#')) {
-                    href = 'https://' + href;
-                    node.setAttribute('href', href);
+    async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        userInput.value = '';
+        userInput.disabled = true;
+        sendBtn.disabled = true;
+
+        // 1. عرض رسالة المستخدم
+        appendUserMessage(message);
+
+        // 2. إظهار النقط فوراً (بدون تأخير)
+        typingIndicator.style.display = 'block';
+        scrollToBottom();
+
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: message,
+                    history: chatHistory,
+                    session_id: sessionId 
+                })
+            });
+
+            if (!response.ok) throw new Error('Server error');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let botMessageFull = '';
+            let botMessageDiv = null;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                botMessageFull += chunk;
+
+                // --- الحل السحري: إخفاء النقط وإنشاء الفقاعة عند أول حرف ---
+                if (!botMessageDiv) {
+                    typingIndicator.style.display = 'none'; // اختفاء النقط
+                    botMessageDiv = createMessageElement('bot'); // ظهور الفقاعة
                 }
+
+                botMessageDiv.innerHTML = DOMPurify.sanitize(marked.parse(botMessageFull));
+                scrollToBottom(); 
             }
 
-            // فتح في نافذة جديدة دائماً
-            node.setAttribute('target', '_blank');
-            node.setAttribute('rel', 'noopener noreferrer');
+            chatHistory.push([message, botMessageFull]);
 
-            // تنسيق الرابط ليظهر بوضوح
-            node.style.color = "#0056b3";
-            node.style.fontWeight = "bold";
-            node.style.textDecoration = "underline";
-        }
-    });
-} else {
-    console.warn("تنبيه: مكتبة DOMPurify غير محملة، الروابط قد لا تعمل بشكل آمن.");
-}
-
-// ==========================================
-// التعامل مع زر Enter
-// ==========================================
-if (userInput) {
-    userInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); 
-            sendMessage();
-        }
-    });
-}
-
-// ==========================================
-// دالة إرسال الرسالة (الأساسية)
-// ==========================================
-async function sendMessage() {
-    // 1. فحوصات الأمان
-    if (!userInput) return; 
-    const text = userInput.value.trim();
-    if (!text) return;
-
-    // 2. تعطيل الواجهة
-    if (userInput) userInput.disabled = true;
-    if (sendBtn) sendBtn.disabled = true;
-
-    // 3. عرض رسالة المستخدم
-    appendMessage(text, 'user-message');
-    userInput.value = '';
-    userInput.style.height = 'auto'; 
-
-    // 4. إنشاء فقاعة الرد وبداخلها المؤشر
-    const botMsgDiv = document.createElement('div');
-    botMsgDiv.className = 'message bot-message';
-    
-    // تصميم المؤشر
-    botMsgDiv.innerHTML = `
-        <div class="typing-indicator">
-            <span>جاري الرد</span>
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-            <span class="typing-dot"></span>
-        </div>
-    `;
-    
-    chatBox.appendChild(botMsgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    try {
-        const response = await fetch('/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text, history: chatHistory })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        
-        // ---------------------------------------------------------
-        // التعديل هنا: حذفنا السطر الذي كان يمسح المؤشر فوراً
-        // botMsgDiv.innerHTML = "";  <-- تم الحذف ❌
-        // ---------------------------------------------------------
-
-        let fullBotResponse = "";
-        let isFirstChunk = true; // متغير جديد لمعرفة أول دفعة
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            const chunk = decoder.decode(value, { stream: true });
-            
-            // إذا كانت الدفعة فارغة (مجرد إشارة اتصال)، تجاهلها ولا تمسح المؤشر
-            if (!chunk) continue;
-
-            // ✅ الآن فقط: إذا وصلت أول كلمة حقيقية، نمسح المؤشر
-            if (isFirstChunk) {
-                botMsgDiv.innerHTML = ""; // مسح "جاري الرد"
-                botMsgDiv.classList.remove('typing'); // لو كنت تستخدم كلاس معين (اختياري)
-                isFirstChunk = false;
-            }
-
-            fullBotResponse += chunk;
-
-            // العرض والتحويل
-            if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
-                const rawHTML = typeof marked.parse === 'function' ? marked.parse(fullBotResponse) : marked(fullBotResponse);
-                botMsgDiv.innerHTML = DOMPurify.sanitize(rawHTML);
-            } else {
-                botMsgDiv.innerText = fullBotResponse;
-            }
-            
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        chatHistory.push([text, fullBotResponse]);
-
-    } catch (error) {
-        console.error("Chat Error:", error);
-        botMsgDiv.innerHTML = "<span style='color:red'>عذراً، حدث خطأ في الاتصال.</span>";
-    } finally {
-        if (userInput) {
+        } catch (error) {
+            console.error("Error:", error);
+            typingIndicator.style.display = 'none';
+            const errorDiv = createMessageElement('bot');
+            errorDiv.textContent = "عذراً، حدث خطأ في الاتصال.";
+            errorDiv.style.color = "red";
+        } finally {
             userInput.disabled = false;
-            userInput.focus();
-        }
-        if (sendBtn) {
             sendBtn.disabled = false;
+            userInput.focus();
+            scrollToBottom();
         }
     }
-}
 
-// ==========================================
-// دالة مساعدة لإضافة الرسائل
-// ==========================================
-function appendMessage(text, className) {
-    const div = document.createElement('div');
-    div.className = `message ${className}`;
-    // نستخدم innerText لرسائل المستخدم للحماية من XSS
-    div.innerText = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+    userInput.focus();
+});

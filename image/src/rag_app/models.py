@@ -6,6 +6,7 @@ class ChatLog(Base):
     __tablename__ = "chat_logs"
 
     id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow) # وقت السؤال
     user_query = Column(String, index=True)               # سؤال المستخدم
     bot_answer = Column(Text)                             # إجابة البوت الكاملة

@@ -29,7 +29,33 @@ import secrets
 import csv
 
 
+# معلومات الفروع الثابتة
+GLOBAL_FACTS = """
+1. **الرياض:**
+   - حي الحمراء: https://maps.app.goo.gl/GyV2WBj9qdr19Gnw8
+   - حي الاندلس: https://maps.app.goo.gl/zYZSZdgyJnN3Ni3p7?g_st=awb
+   - حي ظهرة لبن: https://maps.app.goo.gl/YosPLMqJuDKPC3oM8
 
+2. **الدمام:**
+   - حي الزهور: https://maps.app.goo.gl/peEN6jUXJCBeoPsVA
+   - حي الشاطئ الغربي: https://maps.app.goo.gl/C1fMA4iDmKBQLzde9
+
+3. **خميس مشيط:**
+   - حي الظرفة: https://maps.app.goo.gl/mp5jKJDvZmCo3fN58
+   - حي الضيافة: https://maps.app.goo.gl/2bPMoWxnCezzBTRn7
+
+4. **المدينة المنورة:**
+   - حي الحرة الغربية: https://maps.app.goo.gl/UKXdWt55fL3VdJzR8
+
+5. **حفر الباطن:**
+   - حي المصيف: https://maps.app.goo.gl/2irsjbweCJT5axWJ8
+   - حي الواحه: https://maps.app.goo.gl/F1ji25q1GAxGU6Vd9
+
+6. **سكاكا الجوف:**
+   - حي العزيزية: https://maps.app.goo.gl/hK8Ye5R21ynr27tc7
+
+ملاحظة مهمة: لا يوجد أي فروع أخرى غير الفروع المدرجة أعلاه.
+"""
 load_dotenv()
 
 ADMIN_USER = os.getenv("ADMIN_USER") or "admin"
@@ -111,78 +137,115 @@ def get_current_admin(credentials: HTTPBasicCredentials = Depends(security)):
 class ChatRequest(BaseModel):
     message: str
     history: Optional[List[Tuple[str, str]]] = [] 
+    session_id: str = "unknown"
 
 # --- (RAG Logic) ---
 
+
+
 def prepare_rag_context(message: str, history: List[Tuple[str, str]]):
+    """
+    دالة إعداد سياق RAG للمساعد الذكي
+    
+    Args:
+        message: رسالة المستخدم الحالية
+        history: تاريخ المحادثة [(user_msg, assistant_msg), ...]
+    
+    Returns:
+        tuple: (البرومبت النهائي, استعلام البحث, المستندات المسترجعة, التاريخ المحدود)
+    """
+    # ===== التحقق من وجود قاعدة البيانات =====
     if not vector_store:
         return None, message, [], history
-        
+    
+    # ===== إعدادات الذاكرة =====
     MEMORY_WINDOW_SIZE = 3
+    SIMILARITY_THRESHOLD = 1.5
+    TOP_K_RESULTS = 5
+    
+    # ===== الخطوة 1: تحديد نافذة الذاكرة =====
     limited_history = history[-MEMORY_WINDOW_SIZE:]
     
-    # 1. تحويل الهيستوري إلى نص منسق (User/Assistant) ليفهمه الموديل
+    # ===== الخطوة 2: تنسيق تاريخ المحادثة =====
     formatted_history_text = ""
     if limited_history:
-        formatted_history_text = "\n".join([f"User: {t[0]}\nAssistant: {t[1]}" for t in limited_history])
-
+        formatted_history_text = "\n".join([
+            f"User: {user_msg}\nAssistant: {assistant_msg}" 
+            for user_msg, assistant_msg in limited_history
+        ])
+    
+    # ===== الخطوة 3: إعادة صياغة الاستعلام (إذا وُجد تاريخ) =====
     search_query = message
-
-    # 2. إعادة صياغة السؤال)
+    
     if history:
-        # هذا البرومبت يطلب من الموديل فهم "نية" المستخدم وليس مجرد كلماته
         rephrase_prompt = f"""
-        أنت خبير في فهم سياق المحادثات.
-        لديك محادثة سابقة وسؤال جديد من المستخدم.
+أنت خبير في فهم سياق المحادثات.
+لديك محادثة سابقة وسؤال جديد من المستخدم.
+
+تاريخ المحادثة:
+{formatted_history_text}
+
+رد المستخدم الأخير: {message}
+
+المطلوب:
+- إذا كان رد المستخدم إجابة على سؤال من المساعد (مثلاً المساعد سأل عن شرط، والمستخدم أكد تحقيقه):
+  استنتج "الخطوة التالية" واجعلها هي جملة البحث.
+  (مثال: إذا قال المستخدم "أنا غير مسجل" رداً على شرط التسجيل، اجعل البحث: "طريقة التسجيل لغير المسجلين").
+
+- إذا كان سؤالاً جديداً تماماً، أعد صياغته ليكون واضحاً.
+
+اكتب جملة البحث المحسنة فقط بدون أي مقدمات:
+"""
         
-        تاريخ المحادثة:
-        {formatted_history_text}
-        
-        رد المستخدم الأخير: {message}
-        
-        المطلوب:
-        - إذا كان رد المستخدم إجابة على سؤال من المساعد (مثلاً المساعد سأل عن شرط، والمستخدم أكد تحقيقه):
-          استنتج "الخطوة التالية" واجعلها هي جملة البحث.
-          (مثال: إذا قال المستخدم "أنا غير مسجل" رداً على شرط التسجيل، اجعل البحث: "طريقة التسجيل لغير المسجلين").
-        
-        - إذا كان سؤالاً جديداً تماماً، أعد صياغته ليكون واضحاً.
-        
-        اكتب جملة البحث المحسنة فقط بدون أي مقدمات:
-        """
         try:
             search_query = llm.invoke(rephrase_prompt).content.strip()
-            print(f"--- [DEBUG] Smart Search Query: {search_query} ---") # للتأكد في التيرمينال
-        except: pass
-
-    # 3. البحث
-    results = vector_store.similarity_search_with_score(search_query, k=5)
-    good_docs = [doc.page_content for doc, score in results if score < 1.5]
+            print(f"--- [DEBUG] Smart Search Query: {search_query} ---")
+        except Exception as e:
+            print(f"--- [ERROR] Rephrase failed: {e} ---")
+            search_query = message
+    
+    # ===== الخطوة 4: استرجاع المستندات ذات الصلة =====
+    results = vector_store.similarity_search_with_score(search_query, k=TOP_K_RESULTS)
+    
+    good_docs = [
+        doc.page_content 
+        for doc, score in results 
+        if score < SIMILARITY_THRESHOLD
+    ]
+    
     knowledge = "\n\n".join(good_docs)
+    print(f"--- [DEBUG] Found {len(good_docs)} relevant documents ---")
     
-    # 4. برومبت الرد النهائي (تحسين التنسيق ومنع التكرار)
+    # ===== الخطوة 5: بناء البرومبت النهائي =====
     rag_prompt = f"""
-    أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
-    انت تساعد زوار الموقع الإلكتروني الخاص بالمعهد السعودي المتخصص العالي للتدريب
-    تعليمات للمساعد:
-    1. هدفك هو مساعدة الطالب بناءً على "المعلومات المسترجعة" و "سياق المحادثة".
-    2. لا تبدأ الإجابة بكلمات مثل "الجواب:" أو "الإجابة هي". ادخل في الموضوع مباشرة.
-    3. راقب "تاريخ المحادثة": إذا كان المستخدم قد استوفى شرطاً ذكرته له سابقاً، لا تكرر الشرط، بل أعطه الخطوة التالية (مثل رابط التسجيل أو طريقة التقديم).
-    4. اذا سأل المتدرب عن أسعار  أي دبلوم أو دورة ارسل له الرقم الموحد 920012673 
-    5. اذا تم سؤالك عن التسجيل أو الرغبة في التسجيل ارسل الرقم الموحد 920012673 
-    المعلومات المسترجعة (Context):
-    {knowledge}
-    
-    تاريخ المحادثة (History):
-    {formatted_history_text}
-    
-    User: {message}
-    Assistant:
-    """
-    
-    # لاحظ أننا نرجع limited_history كما هي للكود، لكن استخدمنا formatted_history_text داخل البرومبت فقط
-    return rag_prompt, search_query, good_docs, limited_history
+أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
+تساعد زوار الموقع الإلكتروني الخاص بالمعهد.
 
-async def generate_response_stream(message: str, history: List[Tuple[str, str]], db: Session):
+=== تعليمات مهمة ===
+1. راجع (GLOBAL_FACTS) دائماً قبل الإجابة عن الفروع والمواقع
+2. إذا سأل عن مدينة غير موجودة في القائمة (مثل عرعر، جدة، تبوك):
+   - قل بوضوح: "عذراً، لا يوجد لدينا فرع في هذه المدينة حالياً"
+   - اذكر له الفروع المتاحة كبديل
+3. إذا سأل عن فرع موجود، أعطه اسم الحي والرابط مباشرة
+4. لا تبدأ الإجابة بـ "الجواب:" أو "الإجابة هي" - ادخل في الموضوع مباشرة
+5. راقب تاريخ المحادثة: لا تكرر الشروط المستوفاة، أعط الخطوة التالية
+6. عند السؤال عن الأسعار أو الرغبة في التسجيل: أرسل الرقم الموحد 920012673
+
+=== البيانات الثابتة (GLOBAL_FACTS) ===
+{GLOBAL_FACTS}
+
+=== المعلومات المسترجعة (Context) ===
+{knowledge}
+
+=== تاريخ المحادثة (History) ===
+{formatted_history_text}
+
+User: {message}
+Assistant:
+"""
+    
+    return rag_prompt, search_query, good_docs, limited_history
+async def generate_response_stream(message: str, history: List[Tuple[str, str]],session_id: str, db: Session):
     start_time = time.time() # 1. شغل العداد
     
     rag_prompt, search_query, docs, _ = prepare_rag_context(message, history)
@@ -219,6 +282,7 @@ async def generate_response_stream(message: str, history: List[Tuple[str, str]],
     # 4. الحفظ الموحد والوحيد في قاعدة البيانات
     try:
         new_log = models.ChatLog(
+            session_id=session_id,
             user_query=message,
             bot_answer=full_answer,
             response_time=response_time_to_log, # <--- تم حفظ القيمة الموحدة (TTFT أو الكلي)
@@ -251,7 +315,7 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
         return StreamingResponse(msg(), media_type="text/plain")
         
     return StreamingResponse(
-        generate_response_stream(request.message, request.history, db),
+        generate_response_stream(request.message, request.history,request.session_id, db),
         media_type="text/plain"
     )
 
@@ -323,6 +387,13 @@ def kpi_dashboard(request: Request, db: Session = Depends(get_db), username: str
     # 1. جلب آخر 50 سجل للعرض في الجدول
     logs = db.query(models.ChatLog).order_by(models.ChatLog.timestamp.desc()).limit(50).all()
     
+    grouped_sessions = {}
+    for log in logs:
+        sid = log.session_id or "Anonymous" # لو مفيش آيدي نعتبره مجهول
+        if sid not in grouped_sessions:
+            grouped_sessions[sid] = []
+        grouped_sessions[sid].append(log)
+
     # 2. جلب العدد الكلي للمحادثات
     total_chats = db.query(models.ChatLog).count()
     
@@ -346,6 +417,7 @@ def kpi_dashboard(request: Request, db: Session = Depends(get_db), username: str
 
     return templates.TemplateResponse("kpi.html", {
         "request": request,
+        "grouped_sessions": grouped_sessions,
         "logs": logs,
         "total_chats": total_chats,
         "avg_speed_all": round(avg_speed_all, 2),       # الرقم الأول
@@ -447,6 +519,16 @@ def db_info_endpoint(username: str = Depends(get_current_admin)):
         "maintenance_mode": MAINTENANCE_MODE,
         "db_stats": get_chroma_stats()
     }
-
+# --- 11. Endpoint جديد لحذف جلسة كاملة ---
+@app.delete("/admin/kpi/delete-session/{session_id}")
+def delete_chat_session(session_id: str, db: Session = Depends(get_db), username: str = Depends(get_current_admin)):
+    # مسح جميع الرسائل التي تحمل نفس session_id
+    rows_deleted = db.query(models.ChatLog).filter(models.ChatLog.session_id == session_id).delete()
+    db.commit()
+    
+    if rows_deleted == 0:
+        raise HTTPException(status_code=404, detail="لم يتم العثور على الجلسة")
+        
+    return {"status": "success", "message": f"تم حذف الجلسة {session_id} و {rows_deleted} رسالة تابعة لها"}
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

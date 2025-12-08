@@ -16,293 +16,342 @@
             color: #495057;
         }
 
-        /* تنسيق الناف بار */
+        /* --- Navbar --- */
         .navbar {
             background: linear-gradient(to right, #2c3e50, #4ca1af);
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
             padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.4rem;
             color: white !important;
+            font-size: 1.3rem;
         }
 
-        /* تنسيق البطاقات (Cards) */
+        /* --- KPI Cards --- */
         .stat-card {
             border: none;
             border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden;
-            height: 100%;
-            position: relative;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-icon-bg {
-            position: absolute;
-            right: -20px;
-            bottom: -20px;
-            font-size: 8rem;
-            opacity: 0.1;
-            transform: rotate(-15deg);
-        }
-
-        .card-body {
-            padding: 2rem;
-            z-index: 1;
-            position: relative;
-        }
-
-        .stat-value {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 0;
-            line-height: 1.2;
-        }
-
-        .stat-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            opacity: 0.9;
-            text-transform: uppercase;
-        }
-
-        /* ألوان البطاقات */
-        .card-blue { background: linear-gradient(45deg, #4099ff, #73b4ff); color: white; }
-        .card-dark { background: linear-gradient(45deg, #2c3e50, #4b6cb7); color: white; }
-        .card-performance-good { background: linear-gradient(45deg, #2ed8b6, #59e0c5); color: white; }
-        .card-performance-bad { background: linear-gradient(45deg, #ff5370, #ff869a); color: white; }
-        .bg-warning.text-dark { background: #ffc107 !important; color: #212529 !important; }
-
-        /* تنسيق الجدول */
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
             padding: 20px;
-            margin-top: 2rem;
+            color: white;
+            height: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .bg-gradient-blue { background: linear-gradient(45deg, #4099ff, #73b4ff); }
+        .bg-gradient-dark { background: linear-gradient(45deg, #2c3e50, #4b6cb7); }
+        .bg-gradient-green { background: linear-gradient(45deg, #2ed8b6, #59e0c5); } /* سريع */
+        .bg-gradient-orange { background: linear-gradient(45deg, #ffb64d, #ffcb80); color: #333; } /* متوسط */
+        .bg-gradient-red { background: linear-gradient(45deg, #ff5370, #ff869a); } /* بطيء */
+
+        .stat-value { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
+        .stat-label { font-size: 1rem; opacity: 0.9; }
+
+        /* --- Accordion & Chat --- */
+        .accordion-item {
+            border: 1px solid #e9ecef;
+            margin-bottom: 15px;
+            border-radius: 12px !important;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            background: #fff;
         }
 
-        .table thead th {
-            border-bottom: 2px solid #f0f0f0;
-            color: #888;
+        .accordion-button {
+            padding: 15px 20px;
+            background-color: #fff;
             font-weight: 600;
-            padding-bottom: 15px;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #f0f7ff;
+            color: #0d6efd;
+            box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+        }
+        .accordion-button:focus { box-shadow: none; border-color: rgba(0,0,0,.125); }
+
+        /* Chat Bubbles */
+        .chat-row {
+            padding: 15px;
+            border-bottom: 1px solid #f1f1f1;
+            transition: background 0.3s;
+        }
+        .chat-row:hover { background-color: #fafafa; }
+        .chat-row:last-child { border-bottom: none; }
+
+        .bubble {
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+            max-width: 85%;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .bubble-user {
+            background-color: #e9ecef; /* رمادي فاتح */
+            color: #212529;
+            border-bottom-left-radius: 2px;
+            margin-left: auto; /* محاذاة لليمين (لأن الصفحة RTL) */
+            border: 1px solid #dee2e6;
         }
 
-        .table tbody td {
-            vertical-align: middle;
-            padding: 15px 10px;
-            border-bottom: 1px solid #f8f9fa;
+        .bubble-bot {
+            background-color: #fff;
+            color: #212529;
+            border-bottom-right-radius: 2px;
+            margin-right: auto;
+            border: 1px solid #e2e6ea;
+            border-right: 4px solid #198754; /* خط أخضر مميز */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .badge-time {
-            padding: 8px 12px;
-            border-radius: 30px;
-            font-weight: 600;
-        }
-
-        .btn-action {
+        /* زر حذف الجلسة */
+        .btn-delete-session {
+            position: absolute;
+            left: 60px; /* مكان الزر بالنسبة لليسار */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            padding: 5px 15px;
+            font-size: 0.85rem;
             border-radius: 50px;
-            padding: 10px 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-2px);
         }
     </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark mb-5">
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="fas fa-chart-pie me-2"></i> فريق الذكاء الاصطناعي - KPI System
+                <i class="fas fa-tachometer-alt me-2"></i> لوحة التحكم (KPI)
             </a>
             <div class="d-flex gap-2">
-                <a href="/admin/maintenance" class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-dark shadow-sm">
-                    <i class="fas fa-cogs me-1"></i> صفحة الصيانة
+                <a href="/admin/maintenance" class="btn btn-light btn-sm rounded-pill fw-bold text-dark">
+                    <i class="fas fa-tools me-1"></i> إدارة النظام
                 </a>
             </div>
         </div>
     </nav>
 
     <div class="container pb-5">
-
+        
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold mb-1 text-dark">لوحة القياس والتحليل</h2>
-                <p class="text-muted mb-0">نظرة شاملة على أداء المساعد الذكي</p>
+                <h2 class="fw-bold text-dark mb-1">ملخص الأداء</h2>
+                <p class="text-muted">متابعة المحادثات وسرعة الاستجابة لحظياً</p>
             </div>
-            <div class="d-flex gap-2 mt-3 mt-md-0">
-                <a href="/admin/full-report" target="_blank" class="btn btn-dark btn-action shadow-sm">
-                    <i class="fas fa-print me-2"></i> معاينة التقرير
+            <div>
+                <a href="/admin/full-report" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                    <i class="fas fa-print me-1"></i> تقرير الطباعة
                 </a>
-                <a href="/admin/full-report?download=true" class="btn btn-primary btn-action shadow-sm">
-                    <i class="fas fa-code me-2"></i> حفظ (HTML)
-                </a>
-                <a href="/admin/export-csv" class="btn btn-success btn-action shadow-sm">
-                    <i class="fas fa-file-excel me-2"></i> تصدير (Excel)
+                <a href="/admin/export-csv" class="btn btn-success btn-sm rounded-pill px-3">
+                    <i class="fas fa-file-excel me-1"></i> تحميل Excel
                 </a>
             </div>
         </div>
 
-        <div class="row g-4 mb-5">
+        <div class="row g-3 mb-5">
             <div class="col-md-4">
-                <div class="stat-card card-blue">
-                    <i class="fas fa-comments card-icon-bg"></i>
-                    <div class="card-body">
-                        <div class="stat-title">إجمالي المحادثات</div>
-                        <div class="stat-value">{{ total_chats }}</div>
-                        <div class="stat-desc">سؤال وجواب تم تسجيلهم</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="stat-card card-dark">
-                    <i class="fas fa-history card-icon-bg"></i>
-                    <div class="card-body">
-                        <div class="stat-title">المتوسط التاريخي</div>
-                        <div class="stat-value">{{ avg_speed_all }} <span class="fs-4">ث</span></div>
-                        <div class="stat-desc">متوسط سرعة الرد منذ البداية</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="stat-card {% if avg_speed_last_10 < 5.5 %}card-performance-good{% elif avg_speed_last_10 < 7.0 %}bg-warning text-dark{% else %}card-performance-bad{% endif %}">
-                    <i class="fas fa-tachometer-alt card-icon-bg"></i>
-                    <div class="card-body">
-                        <div class="stat-title">الأداء الحالي (النبض)</div>
-                        <div class="stat-value">{{ avg_speed_last_10 }} <span class="fs-4">ث</span></div>
-                        <div class="stat-desc">
-                            متوسط آخر 10 أسئلة
-                            {% if avg_speed_last_10 < 5.5 %}
-                                <span class="badge bg-white text-success ms-2 px-2 rounded-pill">سريع 🚀</span>
-                            {% elif avg_speed_last_10 < 7.0 %}
-                                <span class="badge bg-dark text-warning ms-2 px-2 rounded-pill">متوسط 👌</span>
-                            {% else %}
-                                <span class="badge bg-white text-danger ms-2 px-2 rounded-pill">بطيء 🐢</span>
-                            {% endif %}
+                <div class="stat-card bg-gradient-blue">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-value">{{ total_chats }}</div>
+                            <div class="stat-label">إجمالي المحادثات</div>
                         </div>
+                        <i class="fas fa-comments fa-3x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card bg-gradient-dark">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-value">{{ avg_speed_all }} <small class="fs-6">ث</small></div>
+                            <div class="stat-label">متوسط السرعة (الكلي)</div>
+                        </div>
+                        <i class="fas fa-history fa-3x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card {% if avg_speed_last_10 < 5.5 %}bg-gradient-green{% elif avg_speed_last_10 < 7.5 %}bg-gradient-orange{% else %}bg-gradient-red{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="stat-value">{{ avg_speed_last_10 }} <small class="fs-6">ث</small></div>
+                            <div class="stat-label">سرعة آخر 10 ردود</div>
+                            <div class="mt-2 badge bg-white bg-opacity-25">
+                                {% if avg_speed_last_10 < 5.5 %} ممتاز 🚀
+                                {% elif avg_speed_last_10 < 7.5 %} مقبول 👌
+                                {% else %} يحتاج تحسين 🐢 {% endif %}
+                            </div>
+                        </div>
+                        <i class="fas fa-heartbeat fa-3x opacity-25"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="table-container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold m-0"><i class="fas fa-list-ul me-2 text-primary"></i> سجلات المحادثات</h5>
-                <span class="badge bg-light text-dark border">آخر 50 محادثة</span>
-            </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-primary">
+                <i class="fas fa-list-ul me-2"></i> سجل الجلسات والمحادثات
+            </h5>
+            <span class="badge bg-secondary rounded-pill">{{ grouped_sessions|length }} جلسة نشطة</span>
+        </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th width="5%">#</th>
-                            <th width="15%">التوقيت</th>
-                            <th width="35%">سؤال المستخدم</th>
-                            <th width="20%">إجابة النظام</th>
-                            <th width="10%">السرعة</th>
-                            <th width="15%">إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in logs %}
-                        <tr id="row-{{ log.id }}">
-                            <td><span class="fw-bold text-dark">{{ loop.index }}</span></td>
+        <div class="accordion" id="sessionsAccordion">
+            
+            {% for session_id, messages in grouped_sessions.items() %}
+            <div class="accordion-item" id="session-card-{{ loop.index }}">
+                
+                <h2 class="accordion-header position-relative" id="heading-{{ loop.index }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ loop.index }}">
+                        <div class="d-flex align-items-center w-100 pe-3">
+                            <div class="rounded-circle bg-light p-2 ms-3 text-primary">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">الجلسة: <span class="text-primary font-monospace">{{ session_id }}</span></div>
+                                <div class="small text-muted">
+                                    <i class="far fa-clock me-1"></i> {{ messages[0].timestamp.strftime('%Y-%m-%d %H:%M') }}
+                                    <span class="mx-1">|</span> 
+                                    <span class="badge bg-info text-dark">{{ messages|length }} رسائل</span>
+                                </div>
+                            </div>
+                        </div>
+                    </button>
 
-                            <td>
-                                <div class="fw-bold text-dark">{{ log.timestamp.strftime('%Y-%m-%d') }}</div>
-                                <div class="small text-muted">{{ log.timestamp.strftime('%H:%M:%S') }}</div>
-                            </td>
+                    <button onclick="deleteSession('{{ session_id }}', 'session-card-{{ loop.index }}', event)" 
+                            class="btn btn-danger btn-delete-session shadow-sm"
+                            title="حذف الجلسة وجميع رسائلها">
+                        <i class="fas fa-trash-alt me-1"></i> حذف الجلسة
+                    </button>
+                </h2>
 
-                            <td>
-                                <div class="text-truncate" style="max-width: 250px;" title="{{ log.user_query }}">
+                <div id="collapse-{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#sessionsAccordion">
+                    <div class="accordion-body bg-light p-0">
+                        
+                        {% for log in messages | reverse %}
+                        <div class="chat-row" id="msg-row-{{ log.id }}">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill">
+                                    {{ log.timestamp.strftime('%H:%M:%S') }}
+                                </span>
+                                <button onclick="deleteSingleMessage({{ log.id }})" class="btn btn-sm btn-outline-danger border-0" title="حذف هذه الرسالة فقط">
+                                    <small><i class="fas fa-times me-1"></i> حذف الرسالة</small>
+                                </button>
+                            </div>
+
+                            <div class="d-flex mb-2">
+                                <div class="bubble bubble-user">
+                                    <strong><i class="fas fa-user me-1 text-primary"></i> المستخدم:</strong><br>
                                     {{ log.user_query }}
                                 </div>
-                            </td>
+                            </div>
 
-                            <td>
-                                <div class="text-muted text-truncate" style="max-width: 200px;">
+                            <div class="d-flex">
+                                <div class="bubble bubble-bot w-100">
+                                    <strong><i class="fas fa-robot me-1 text-success"></i> المساعد:</strong><br>
                                     {{ log.bot_answer }}
+                                    
+                                    <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
+                                        <small class="text-muted" style="font-size:0.75rem">
+                                            السرعة: 
+                                            <span class="fw-bold {% if log.response_time < 5 %}text-success{% else %}text-danger{% endif %}">
+                                                {{ "%.2f"|format(log.response_time) }}s
+                                            </span>
+                                        </small>
+                                        <a href="/admin/kpi/{{ log.id }}" class="text-decoration-none small text-muted">
+                                            <i class="fas fa-info-circle"></i> التفاصيل
+                                        </a>
+                                    </div>
                                 </div>
-                            </td>
+                            </div>
 
-                            <td>
-                                {% if log.response_time < 5.5 %}
-                                    <span class="badge bg-success badge-time">{{ "%.2f"|format(log.response_time) }}s</span>
-                                {% elif log.response_time < 7.0 %}
-                                    <span class="badge bg-warning text-dark badge-time">{{ "%.2f"|format(log.response_time) }}s</span>
-                                {% else %}
-                                    <span class="badge bg-danger badge-time">{{ "%.2f"|format(log.response_time) }}s</span>
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                <a href="/admin/kpi/{{ log.id }}" class="btn btn-outline-primary btn-sm rounded-pill px-3" title="التفاصيل">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-
-                                <button onclick="deleteLog({{ log.id }})" class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-1" title="حذف السجل">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
+                        </div>
                         {% endfor %}
-                    </tbody>
-                </table>
+
+                    </div>
+                </div>
             </div>
+            {% endfor %}
+
+            {% if grouped_sessions|length == 0 %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                <p>لا توجد محادثات مسجلة حتى الآن.</p>
+            </div>
+            {% endif %}
+
         </div>
 
-        <div class="text-center mt-4 text-muted small">
-            &copy; 2025 المعهد السعودي العالي المتخصص للتدريب - جميع الحقوق محفوظة
+        <div class="text-center mt-5 mb-3 text-muted small">
+            &copy; 2025 نظام إدارة الـ KPI - المعهد السعودي
         </div>
     </div>
 
     <script>
-        async function deleteLog(logId) {
-            if (!confirm("هل أنت متأكد من رغبتك في حذف هذا السجل نهائياً؟")) {
-                return;
-            }
+        // 1. دالة حذف رسالة واحدة
+        async function deleteSingleMessage(logId) {
+            if (!confirm("هل تريد حذف هذا السؤال وإجابته فقط؟ لن يتم حذف باقي الجلسة.")) return;
 
             try {
-                const response = await fetch(`/admin/kpi/delete/${logId}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    const row = document.getElementById(`row-${logId}`);
-                    row.style.transition = "all 0.5s ease";
-                    row.style.opacity = "0";
+                const res = await fetch(`/admin/kpi/delete/${logId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    const row = document.getElementById(`msg-row-${logId}`);
+                    // تأثير بصري للاختفاء
+                    row.style.backgroundColor = "#ffebee";
+                    row.style.transition = "all 0.5s";
                     setTimeout(() => {
-                        row.remove();
-                        // إعادة تحميل الصفحة ضروري لإعادة ترتيب الأرقام التسلسلية
-                        location.reload();
+                        row.style.opacity = '0';
+                        setTimeout(() => row.remove(), 300);
+                    }, 100);
+                } else {
+                    alert("فشل الحذف. ربما الرسالة محذوفة بالفعل.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("خطأ في الاتصال بالسيرفر");
+            }
+        }
+
+        // 2. دالة حذف الجلسة بالكامل
+        async function deleteSession(sessionId, cardId, event) {
+            // منع انتشار الحدث عشان الأكورديون مايفتحش ويقفل لما ندوس حذف
+            if(event) event.stopPropagation();
+
+            if (!confirm(`تحذير هام!\nسيتم حذف الجلسة كاملة (ID: ${sessionId}).\nهل أنت متأكد؟`)) return;
+
+            try {
+                // استدعاء الـ Endpoint الجديد في main.py
+                const res = await fetch(`/admin/kpi/delete-session/${sessionId}`, { method: 'DELETE' });
+                
+                if (res.ok) {
+                    const card = document.getElementById(cardId);
+                    // تأثير بصري للاختفاء
+                    card.style.transform = 'scale(0.95)';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.remove();
+                        // تحديث الصفحة اختياري لتحديث الأرقام اللي فوق
+                        location.reload(); 
                     }, 500);
                 } else {
-                    alert("فشل الحذف. ربما السجل غير موجود.");
+                    const data = await res.json();
+                    alert("فشل الحذف: " + (data.detail || "خطأ غير معروف"));
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert("حدث خطأ في الاتصال بالسيرفر.");
+            } catch (err) {
+                console.error(err);
+                alert("خطأ في الاتصال بالسيرفر.");
             }
         }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
