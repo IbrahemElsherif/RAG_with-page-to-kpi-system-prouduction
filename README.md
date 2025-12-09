@@ -12,6 +12,7 @@ If you want to test without Docker:
 ## 3. Docker image
 
 #### Build Docker image
+`cd image`
 `docker build -t my-rag-app .`
 #### Run docker image
 
@@ -27,11 +28,12 @@ If you want to test without Docker:
 #### Tag your local image to your Docker Hub repository
 `docker tag my-rag-app ebrahemhesham/rag-app:v1`
 
+#### Run docker compose
 #### Push the image
 `docker push ebrahemhesham/rag-app:v1`
 
 #### Update AWS Service
-```
+```bash
 aws ecs update-service \
    --cluster default \
    --service sstli-chatbot-spot \
@@ -39,3 +41,10 @@ aws ecs update-service \
 ```
     
 
+#### Create EFS (Repeat for each subnet ID where your Fargate tasks run)
+```bash
+aws efs create-mount-target \
+    --file-system-id <fs-id> \
+    --subnet-id <subnet-id> \
+    --security-groups <security-group-id>
+```
