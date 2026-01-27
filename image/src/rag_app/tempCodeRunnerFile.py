@@ -1,1 +1,1 @@
-.resolve()
+security = HTTPBasic()

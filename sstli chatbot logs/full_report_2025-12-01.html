@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>التقرير الشامل للمحادثات</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .report-header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #333; }
+        .chat-entry { border: 1px solid #ddd; margin-bottom: 30px; page-break-inside: avoid; border-radius: 8px; overflow: hidden; }
+        .entry-header { background-color: #f8f9fa; padding: 10px 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; font-weight: bold; color: #555; }
+        .entry-body { padding: 20px; }
+        .q-box { margin-bottom: 15px; }
+        .a-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-right: 4px solid #28a745; white-space: pre-wrap; }
+        .label { color: #0d6efd; font-weight: bold; margin-bottom: 5px; display: block; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            .chat-entry { border: 1px solid #ccc; }
+            body { padding: 0; margin: 0; }
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="container">
+        <div class="d-flex justify-content-between mb-4 no-print">
+            <a href="/admin/kpi" class="btn btn-secondary">← عودة للوحة التحكم</a>
+            <button onclick="window.print()" class="btn btn-primary btn-lg"> طباعه التقرير pdf </button>
+        </div>
+
+        <div class="report-header">
+            <h1>سجل المحادثات الكامل</h1>
+            <p>المعهد السعودي المتخصص العالي للتدريب</p>
+            <small>تاريخ استخراج التقرير: 2025-12-01 16:55</small>
+            <br>
+            <small>إجمالي المحادثات: 37</small>
+        </div>
+
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #37</span>
+                <span>2025-12-01 | 16:46</span>
+                <span>السرعة: 1.73s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">اهلا</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    مرحبًا! كيف يمكنني مساعدتك اليوم في المعهد السعودي المتخصص العالي للتدريب؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #36</span>
+                <span>2025-12-01 | 16:43</span>
+                <span>السرعة: 1.32s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ادارة التمريض</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    للحصول على تفاصيل دقيقة حول رسوم دبلوم إدارة التمريض، يمكنك زيارة صفحة البرامج على موقع المعهد. إذا كنت بحاجة إلى معلومات إضافية أو مساعدة في التسجيل، فلا تتردد في طرح المزيد من الأسئلة!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #35</span>
+                <span>2025-12-01 | 16:43</span>
+                <span>السرعة: 1.32s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">كم الرسوم</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    تعتمد رسوم البرامج على نوع البرنامج ومدته. يمكنك زيارة صفحة البرامج على موقع المعهد للحصول على تفاصيل دقيقة حول الرسوم لكل برنامج. إذا كنت بحاجة إلى مساعدة إضافية، فلا تتردد في طرح المزيد من الأسئلة!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #34</span>
+                <span>2025-12-01 | 16:17</span>
+                <span>السرعة: 2.44s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ماهي التخصصات دبلوم عن بعد</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    التخصص المتاح للدراسة عن بعد هو دبلوم إدارة الموارد البشرية. إذا كنت مهتمًا بالتسجيل أو تحتاج إلى مزيد من المعلومات، يمكنك زيارة موقع المعهد للحصول على التفاصيل اللازمة.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #33</span>
+                <span>2025-12-01 | 16:16</span>
+                <span>السرعة: 0.74s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">دبلوم عن بعد</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    الدبلوم عن بعد متاح في عدة تخصصات، ويتيح للطلاب الدراسة من أي مكان. إذا كنت مهتمًا بالتسجيل، يمكنك زيارة موقع المعهد للحصول على تفاصيل أكثر حول البرامج المتاحة وشروط القبول.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #32</span>
+                <span>2025-12-01 | 16:00</span>
+                <span>السرعة: 2.15s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">كم عدد خريجين المعهد ؟</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    عدد خريجي المعهد السعودي المتخصص العالي للتدريب يتجاوز الآلاف، حيث يساهم المعهد في تأهيل وتدريب العديد من المتدربين سنويًا. إذا كنت بحاجة إلى معلومات أكثر دقة حول عدد الخريجين أو تفاصيل أخرى، يمكنك زيارة الموقع الرسمي للمعهد أو التواصل مع قسم الاستفسارات.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #31</span>
+                <span>2025-12-01 | 16:00</span>
+                <span>السرعة: 0.94s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">هل المعهد معتمد؟</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    نعم، المعهد السعودي المتخصص العالي للتدريب معتمد من المؤسسة العامة للتدريب التقني والمهني منذ عام ١٤٣٣ هـ.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #30</span>
+                <span>2025-12-01 | 15:50</span>
+                <span>السرعة: 1.29s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">هل انت غبي ؟</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    أنا هنا لمساعدتك، وإذا كان لديك أي استفسار أو موضوع تود مناقشته، فلا تتردد في طرحه. كيف يمكنني مساعدتك اليوم؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #29</span>
+                <span>2025-12-01 | 15:50</span>
+                <span>السرعة: 2.02s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">لا قولي ي حبيبي</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    أنا هنا لمساعدتك! إذا كان لديك أي استفسار حول المعهد السعودي المتخصص العالي للتدريب أو البرامج المتاحة، فلا تتردد في طرحه.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #28</span>
+                <span>2025-12-01 | 15:50</span>
+                <span>السرعة: 1.15s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">حبيبييييييييييييييييييييي</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    مرحبًا! كيف يمكنني مساعدتك اليوم؟ إذا كان لديك أي استفسار حول المعهد أو البرامج التدريبية، فلا تتردد في طرحه.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #27</span>
+                <span>2025-12-01 | 15:28</span>
+                <span>السرعة: 1.17s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">دبلوم أداره التمريض حضوري ولا عن بعد وبكم</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    دبلوم إدارة التمريض هو دبلوم حضوري. بالنسبة للتكاليف، يمكنك زيارة موقع المعهد للحصول على تفاصيل دقيقة حول الرسوم الدراسية.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #26</span>
+                <span>2025-12-01 | 14:22</span>
+                <span>السرعة: 0.98s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ايش هي مقررات دبلوم إدارة السلامة</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    المقررات التي يتضمنها دبلوم إدارة السلامة تشمل:
+
+- مقدمة في أنظمة ولوائح الأمن والسلامة
+- إدارة السلامة الصناعية
+- سلامة بيئة العمل
+- مكافحة الحرائق
+- الإخلاء والإسعافات الأولية
+- إدارة السلامة ومنع الخسائر
+- تحليل المخاطر
+- كتابة تقارير السلامة
+- السلامة العامة
+- تشريعات السلامة والصحة المهنية في المملكة
+- متطلبات السلامة في المنشآت
+- إدارة الأزمات والمخاطر
+- السلامة والصحة المهنية
+- إعداد تقارير السلامة باللغة الإنجليزية
+- الإدارة الاستراتيجية للأزمات والمخاطر
+- التعامل مع وسائل الإعلام
+
+إذا كان لديك أي استفسار آخر أو تحتاج لمزيد من المعلومات، فلا تتردد في طرح سؤالك!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #25</span>
+                <span>2025-12-01 | 14:20</span>
+                <span>السرعة: 2.16s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">هل شهادة المعهد معتمدة</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    نعم، شهادة المعهد السعودي المتخصص العالي للتدريب معتمدة من المؤسسة العامة للتدريب التقني والمهني ومرخصة رسميًا من وزارة التعليم السعودية. إذا كنت بحاجة إلى مزيد من التفاصيل أو لديك استفسارات أخرى، فلا تتردد في طرحها!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #24</span>
+                <span>2025-12-01 | 14:20</span>
+                <span>السرعة: 1.26s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ما عدد ساعاته</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    عدد الساعات المعتمدة لدبلوم الأمن السيبراني هو ٧٦ ساعة. إذا كنت بحاجة إلى مزيد من المعلومات أو لديك استفسارات أخرى، فلا تتردد في طرحها!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #23</span>
+                <span>2025-12-01 | 14:20</span>
+                <span>السرعة: 1.29s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ماهي مقررات الأمن اسايبراني</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    المقررات التي يتضمنها دبلوم الأمن السيبراني تشمل:
+
+- أساسيات علم التشفير
+- البرمجة بلغة البايثون
+- أساسيات الأمن السيبراني
+- الذكاء الاصطناعي
+- الجرائم الإلكترونية
+- الحوسبة السحابية
+- إدارة أمن المعلومات
+- الاختراق الأخلاقي
+- مقدمة في أمن الشبكات
+- موضوعات مختارة في الأمن السيبراني
+
+إذا كان لديك أي استفسار آخر أو تحتاج لمزيد من المعلومات، فلا تتردد في طرح سؤالك!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #22</span>
+                <span>2025-12-01 | 14:19</span>
+                <span>السرعة: 2.12s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">من انت</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    أنا مساعد ذكي هنا لمساعدتك في الحصول على المعلومات المتعلقة بالمعهد السعودي المتخصص العالي للتدريب. إذا كان لديك أي استفسار أو تحتاج إلى مساعدة، فلا تتردد في طرح سؤالك!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #21</span>
+                <span>2025-12-01 | 14:19</span>
+                <span>السرعة: 1.09s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">كيف اسجل</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    يمكنك التسجيل من خلال تعبئة طلب الالتحاق الإلكتروني المتاح على موقع المعهد. قم بإنشاء حساب عبر بوابة التسجيل، ثم املأ نموذج طلب الالتحاق بالبرنامج المطلوب وأرفق المستندات اللازمة مثل شهادة الثانوية وبطاقة الهوية. بعد ذلك، أرسل الطلب إلكترونيًا وانتظر إشعار القبول لاستكمال الإجراءات.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #20</span>
+                <span>2025-12-01 | 14:19</span>
+                <span>السرعة: 0.63s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">وين فروع المعهد</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    لدينا ۱۷ فرعاً في عدة مدن، منها الرياض، الدمام، المدينة المنورة، خميس مشيط، حفر الباطن، وسكاكا. إذا كنت بحاجة لمزيد من التفاصيل حول فروع معينة، يمكنك إخباري.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #19</span>
+                <span>2025-12-01 | 14:19</span>
+                <span>السرعة: 1.93s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">عايز اسجل في المعهد</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    يمكنك التسجيل في المعهد السعودي المتخصص العالي للتدريب من خلال زيارة الموقع الإلكتروني الخاص بالمعهد على الرابط التالي: [www.sstli.com](http://www.sstli.com). هناك ستجد جميع المعلومات اللازمة حول البرامج المتاحة وإجراءات التسجيل. إذا كان لديك أي استفسارات إضافية، فلا تتردد في طرحها!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #18</span>
+                <span>2025-12-01 | 14:18</span>
+                <span>السرعة: 0.84s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ماهي فروع المعهد السعودي</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    لدينا 17 فرعاً للمعهد السعودي المتخصص العالي للتدريب في عدة مدن، منها الرياض، الدمام، المدينة المنورة، خميس مشيط، حفر الباطن، وسكاكا. إذا كنت بحاجة لمعلومات أكثر تفصيلاً عن فروع معينة أو كيفية التسجيل، فلا تتردد في السؤال!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #17</span>
+                <span>2025-12-01 | 13:54</span>
+                <span>السرعة: 2.45s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">دبلوم</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    يمكنك الاطلاع على الدبلومات المتاحة في المعهد، والتي تشمل برامج دورات تأهيلية. إذا كنت مهتمًا بالتسجيل في أحد هذه الدبلومات، يمكنك زيارة صفحة التسجيل على موقع المعهد للحصول على المزيد من التفاصيل والإجراءات اللازمة.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #16</span>
+                <span>2025-12-01 | 13:54</span>
+                <span>السرعة: 1.08s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">dw</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    كيف يمكنني مساعدتك اليوم؟ إذا كان لديك أي استفسار حول البرامج التدريبية أو كيفية التسجيل، فلا تتردد في طرحه.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #15</span>
+                <span>2025-12-01 | 13:52</span>
+                <span>السرعة: 1.83s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">دبلوم إدارة التمريض هل متاح للعسكرين</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    دبلوم إدارة التمريض متاح للعسكريين، ولكن يجب عليهم التحقق من الشروط المحددة التي قد تنطبق عليهم. يُفضل التواصل مع قسم التسجيل في المعهد للحصول على تفاصيل دقيقة حول المتطلبات والإجراءات اللازمة. هل تحتاج إلى مساعدة إضافية؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #14</span>
+                <span>2025-12-01 | 13:51</span>
+                <span>السرعة: 1.43s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">شكرا</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    إذا كان لديك أي استفسارات أخرى أو تحتاج إلى مزيد من المعلومات حول دبلوم القانون أو أي برامج أخرى، فلا تتردد في طرحها. أنا هنا للمساعدة!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #13</span>
+                <span>2025-12-01 | 13:50</span>
+                <span>السرعة: 1.84s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">المدة الرداسية وعدد الساعات والسعر</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    مدة الدراسة لدبلوم القانون هي عادةً سنتين، وعدد الساعات المعتمدة هو ٨٤ ساعة. بالنسبة للسعر، يمكنك زيارة موقع المعهد أو التواصل مع قسم التسجيل للحصول على تفاصيل دقيقة حول الرسوم. هل تحتاج إلى مساعدة إضافية؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #12</span>
+                <span>2025-12-01 | 13:50</span>
+                <span>السرعة: 1.02s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">معالي الباشا محتاج استفسر عن دبلوم القانون</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    ما هي استفساراتك حول دبلوم القانون؟ يمكنك طرح أي سؤال يتعلق بالمقررات، طريقة الدراسة، أو أي تفاصيل أخرى تود معرفتها.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #11</span>
+                <span>2025-12-01 | 12:54</span>
+                <span>السرعة: 0.77s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ايه الدنيا</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    مرحبًا! كيف يمكنني مساعدتك اليوم؟ هل لديك استفسار حول البرامج التدريبية أو كيفية التسجيل في المعهد؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #10</span>
+                <span>2025-12-01 | 12:46</span>
+                <span>السرعة: 0.68s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ماهي دبلومات المعهد السعودي</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    يقدم المعهد السعودي المتخصص العالي للتدريب مجموعة متنوعة من الدبلومات في مجالات متعددة، تشمل عادةً:
+
+1. دبلومات في التقنية المعلوماتية.
+2. دبلومات في إدارة الأعمال.
+3. دبلومات في الهندسة.
+4. دبلومات في التصميم الجرافيكي.
+5. دبلومات في الأمن السيبراني.
+
+يمكنك زيارة الموقع الرسمي للمعهد للحصول على تفاصيل أكثر حول الدبلومات المتاحة، بما في ذلك المقررات الدراسية ومتطلبات التسجيل.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #9</span>
+                <span>2025-12-01 | 12:30</span>
+                <span>السرعة: 1.91s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">نعم</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    يمكنك التواصل مع المعهد السعودي المتخصص العالي للتدريب عبر الوسائل التالية: 
+
+- رقم الهاتف الموحد: 920012673
+- الموقع الإلكتروني: [www.sstli.com](http://www.sstli.com)
+- إنستجرام: saudi_specialized_institute
+- سناب شات وتيك توك: sstli1443
+
+إذا كان لديك أي استفسارات أخرى أو تحتاج إلى مزيد من المعلومات، فلا تتردد في طرحها!
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #8</span>
+                <span>2025-12-01 | 12:30</span>
+                <span>السرعة: 2.64s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">اؤقام ااتواصل</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    يمكنك التواصل مع المعهد السعودي المتخصص العالي للتدريب عبر الهاتف أو البريد الإلكتروني. إذا كنت بحاجة إلى معلومات محددة حول أرقام الهواتف أو البريد الإلكتروني، يرجى زيارة صفحة الاتصال على موقع المعهد. هل تحتاج إلى مساعدة إضافية؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #7</span>
+                <span>2025-12-01 | 12:29</span>
+                <span>السرعة: 2.21s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">دبلوم الامن السيبراني</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    دبلوم الأمن السيبراني يتكون من ٨ مستويات دراسية ويشمل دراسة حوالي ٢٦ مقررًا تغطي مختلف جوانب أمن المعلومات وحماية الشبكات. إذا كنت مهتمًا بالتسجيل أو تحتاج إلى مزيد من المعلومات، يمكنني مساعدتك في ذلك.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #6</span>
+                <span>2025-12-01 | 12:29</span>
+                <span>السرعة: 1.24s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ما هي بدلومات المعهد</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    الدبلومات المعتمدة في المعهد تشمل: دبلوم إدارة المستشفيات والخدمات الصحية، دبلوم إدارة التمريض، دبلوم القانون، دبلوم الأمن السيبراني، دبلوم إدارة الأعمال، دبلوم إدارة السلامة، دبلوم الإدارة المكتبية، دبلوم إدارة الموارد البشرية، دبلوم المحاسبة، ودبلوم مشارك الإدارة المكتبية (12 شهر). إذا كنت مهتمًا بالتسجيل في أحد هذه الدبلومات، يمكنني مساعدتك في معرفة خطوات التقديم.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #5</span>
+                <span>2025-12-01 | 12:29</span>
+                <span>السرعة: 0.58s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">اهلا بك</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    أهلاً وسهلاً! كيف يمكنني مساعدتك اليوم؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #4</span>
+                <span>2025-12-01 | 12:28</span>
+                <span>السرعة: 0.85s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">السلام عليكم</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    وعليكم السلام! كيف يمكنني مساعدتك اليوم؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #3</span>
+                <span>2025-12-01 | 12:27</span>
+                <span>السرعة: 1.65s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">اهلا</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    أهلاً وسهلاً! كيف يمكنني مساعدتك اليوم؟
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #2</span>
+                <span>2025-12-01 | 12:10</span>
+                <span>السرعة: 2.01s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">ما هي تخصصات المعهد السعودي</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    المعهد السعودي المتخصص العالي للتدريب يقدم مجموعة متنوعة من التخصصات في مجالات التقنية والمهنية. تشمل التخصصات الرئيسية مثل:
+
+1. تقنية المعلومات.
+2. الشبكات.
+3. البرمجة.
+4. إدارة الأعمال.
+5. التصميم الجرافيكي.
+6. الكهرباء والالكترونيات.
+
+إذا كنت مهتمًا بتخصص معين أو تحتاج إلى مزيد من التفاصيل، يمكنك زيارة الموقع الإلكتروني للمعهد أو التواصل معنا عبر الهاتف.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-entry">
+            <div class="entry-header">
+                <span>سجل رقم #1</span>
+                <span>2025-12-01 | 12:09</span>
+                <span>السرعة: 3.35s</span>
+            </div>
+            <div class="entry-body">
+                <div class="q-box">
+                    <span class="label">سؤال المستخدم:</span>
+                    <div style="font-size: 1.1em;">اهلا بك</div>
+                </div>
+                <div class="a-box">
+                    <span class="label" style="color: #198754;">إجابة النظام:</span>
+                    أهلاً وسهلاً! كيف يمكنني مساعدتك اليوم؟
+                </div>
+            </div>
+        </div>
+        
+
+    </div>
+
+</body>
+</html>

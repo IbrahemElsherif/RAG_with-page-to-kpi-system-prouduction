@@ -1,0 +1,72 @@
+{
+    "family": "sstli-chatbot-v3",
+    "executionRoleArn": "arn:aws:iam::517311507975:role/service-role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "cpu": "512",
+    "memory": "1024",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "containerDefinitions": [
+        {
+            "name": "rag-container",
+            "image": "ebrahemhesham/rag-app:v1",
+            "essential": true,
+            "portMappings": [
+                {
+                    "name": "rag-container-80-tcp",
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "OPENAI_API_KEY",
+                    "value": "sk-proj-api-key"
+                },
+                {
+                    "name": "DB_PATH",
+                    "value": "/mnt/efs/kpi_data.db"
+                },
+                {
+                    "name": "CHROMA_PATH",
+                    "value": "/mnt/efs/chroma_db"
+                },
+                {
+                    "name": "ADMIN_USER",
+                    "value": "admin"
+                },
+                {
+                    "name": "ADMIN_PASS",
+                    "value": "admin1234"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "rag-storage",
+                    "containerPath": "/mnt/efs",
+                    "readOnly": false
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/sstli-chatbot",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "volumes": [
+        {
+            "name": "rag-storage",
+            "efsVolumeConfiguration": {
+                "fileSystemId": "fs-082c090d69c139f7b",
+                "rootDirectory": "/",
+                "transitEncryption": "ENABLED"
+            }
+        }
+    ]
+}
