@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  rag-app:
+    build:
+      context: ./image
+      dockerfile: dockerfile
+    container_name: rag-app
+    ports:
+      - "80:80"
+    env_file:
+      - ./image/.env
+    environment:
+      # Database persistent volume path (absolute path inside container)
+      # The app runs from /app/src/rag_app, but we store data in /data for persistence
+      - DB_PATH=/data/kpi_data.db
+      # ChromaDB persistent volume path (absolute path inside container)
+      - CHROMA_PATH=/data/chroma_db
+    volumes:
+      # Bind mount to local data folder (created automatically if it doesn't exist)
+      # This maps ./data on your host to /data inside the container
+      - ./data:/data
+      # Optional: Mount .env file if needed (uncomment if you want to override)
+      # - ./image/.env:/app/.env:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -14,8 +14,7 @@ docker-compose.yml
 AWS_DEPLOYMENT.md
 *.json
 *.JSON
-TSK.JSON
-
+sstli chatbot logs/
 # --- Project Specific Fixes ---
 
 # Fix casing: Your screenshot shows "Media", but the original file had "media"
