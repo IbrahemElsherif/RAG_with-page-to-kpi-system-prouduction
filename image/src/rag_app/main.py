@@ -13,7 +13,7 @@ from chromadb.config import Settings
 
 from sqlalchemy.orm import Session
 import io
-from database import engine, SessionLocal, get_db
+from rag_app.database import engine, SessionLocal, get_db
 import models
 
 from pydantic import BaseModel

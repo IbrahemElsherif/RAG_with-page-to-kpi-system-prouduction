@@ -1,31 +1,46 @@
-# 1. python image
+# Stage 1: Build stage for UV
+FROM ghcr.io/astral-sh/uv:latest AS uv_bin
+
+# Stage 2: Final runtime image
 FROM python:3.12-slim
 
-# 2. Set environment variables to improve performance and prevent cache files
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Copy the uv executable from the bin stage
+COPY --from=uv_bin /uv /uvx /bin/
 
-# 3. Define working directory
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src:/app/src/rag_app \
+    # UV constant for optimization
+    UV_COMPILE_BYTECODE=1 \
+    # Standard location for the virtualenv created by uv
+    VIRTUAL_ENV=/app/.venv
+
+# Add virtualenv to PATH so we don't need 'uv run' every time
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 WORKDIR /app
 
-# 4. Install necessary system libraries (important for ChromaDB and SQLite)
+# Install system dependencies (needed for ChromaDB)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. Copy requirements file first (to take advantage of cache when rebuilding)
-COPY requirements.txt .
+# Copy uv dependency files (lock and project files)
+# These layers are cached unless pyproject.toml or uv.lock change
+COPY pyproject.toml uv.lock ./
 
-# 6. Install libraries (RAG_prouduction will be ignored thanks to .dockerignore file)
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+# Install dependencies into the virtual environment
+# --frozen: ignores pyproject.toml updates and sticks strictly to uv.lock
+RUN uv sync --frozen --no-cache
 
-# 7. Copy rest of project files (code, templates, database)
+# Copy the rest of the application code
 COPY . .
-WORKDIR /app/src/rag_app
-# 8. Expose port 80
+
+# Expose the application port
 EXPOSE 80
 
-# 9. Run command
-# We use host 0.0.0.0 so the external world can see the site
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# Command to run the app
+# Note: Since the virtualenv is in PATH, we call uvicorn directly
+CMD ["uvicorn", "src.rag_app.main:app", "--host", "0.0.0.0", "--port", "80", "--proxy-headers"]
