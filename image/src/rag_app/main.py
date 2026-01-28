@@ -260,12 +260,39 @@ def prepare_rag_context(message: str, history: List[Tuple[str, str]]):
     knowledge = "\n\n".join(good_docs)
     print(f"--- [DEBUG] Found {len(good_docs)} relevant documents ---")
 
+
+    # rag_prompt = f"""
+    # أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
+    # تستخدم المعلومات المتاحة للإجابة على استفسارات الزوار.
+
+    # === البيانات الثابتة (GLOBAL_FACTS) ===
+    # {GLOBAL_FACTS}
+
+    # === المعلومات المسترجعة (Context) ===
+    # {knowledge}
+
+    # === تاريخ المحادثة (History) ===
+    # {formatted_history_text}
+
+    # === تعليمات الإجابة (Guidelines) ===
+    # 1. البيانات أعلاه (Context & Facts) باللغة العربية، لكن يجب أن ترد بناءً على لغة المستخدم.
+    # 2. إذا سأل عن مدينة غير موجودة (مثل جدة، تبوك): اعتذر واذكر الفروع المتاحة.
+    # 3. عند السؤال عن الأسعار أو التسجيل: أرسل الرقم الموحد 920012673 ورقم الواتساب 0554194677.
+    # 4. كن مباشراً ومختصراً.
+
+    # === LANGUAGE PROTOCOL (CRITICAL) ===
+    # 1. **Detect User Language:** Check the last message sent by the user: "{message}".
+    # 2. **IF ARABIC:** Answer directly in Arabic.
+    # 3. **IF ENGLISH:** You MUST translate the relevant information from the Context/Facts into English and answer in English. - Example: If context says "فرع الرياض في حي الحمراء", and user asks "Where is Riyadh branch?", you MUST say: "The Riyadh branch is located in Al-Hamra district..." with the Google Map link.
+
+    # User: {message}
+    # Assistant:
+    # """
+
     # ===== الخطوة 5: بناء البرومبت النهائي =====
     rag_prompt = f"""
 أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
 تساعد زوار الموقع الإلكتروني الخاص بالمعهد.
-دائما اجعل ردك المسترجع بنفس لغة المستخدم
-اذا كان المستخدم يسأل اللغة الإنجليزية فترجم ردك الى اللغة الإنجليزية
 
 === تعليمات مهمة ===
 1. راجع (GLOBAL_FACTS) دائماً قبل الإجابة عن الفروع والمواقع
@@ -275,7 +302,7 @@ def prepare_rag_context(message: str, history: List[Tuple[str, str]]):
 3. إذا سأل عن فرع موجود، أعطه اسم الحي والرابط مباشرة
 4. لا تبدأ الإجابة بـ "الجواب:" أو "الإجابة هي" - ادخل في الموضوع مباشرة
 5. راقب تاريخ المحادثة: لا تكرر الشروط المستوفاة، أعط الخطوة التالية
-6. عند السؤال عن الأسعار أو الرغبة في التسجيل: أرسل الرقم الموحد 920012673 والرقم 0558937492 للواتساب
+6. عند السؤال عن الأسعار أو الرغبة في التسجيل: أرسل الرقم الموحد 920012673 والرقم 0554194677 للواتساب
 
 === البيانات الثابتة (GLOBAL_FACTS) ===
 {GLOBAL_FACTS}
