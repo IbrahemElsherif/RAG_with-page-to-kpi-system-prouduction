@@ -13,7 +13,7 @@ from chromadb.config import Settings
 
 from sqlalchemy.orm import Session
 import io
-from rag_app.database import engine, SessionLocal, get_db
+from database import engine, SessionLocal, get_db
 import models
 
 from pydantic import BaseModel
@@ -64,6 +64,40 @@ GLOBAL_FACTS = """
    - حي العزيزية: https://maps.app.goo.gl/hK8Ye5R21ynr27tc7
 
 ملاحظة مهمة: لا يوجد أي فروع أخرى غير الفروع المدرجة أعلاه.
+
+**ملخص:** تم ترجمة القائمة المرفقة إلى اللغة الإنجليزية مع الالتزام التام بالترقيم، الهيكل، وعلامات النجمة (*) كما طلبت.
+
+---
+
+1. **Riyadh:**
+* Al Hamra District: https://maps.app.goo.gl/GyV2WBj9qdr19Gnw8
+* Al Andalus District: https://maps.app.goo.gl/zYZSZdgyJnN3Ni3p7?g_st=awb
+* Dhahrat Laban District: https://maps.app.goo.gl/YosPLMqJuDKPC3oM8
+
+
+2. **Dammam:**
+* Az Zuhur District: https://maps.app.goo.gl/peEN6jUXJCBeoPsVA
+* Ash Shati Al Gharbi District: https://maps.app.goo.gl/C1fMA4iDmKBQLzde9
+
+
+3. **Khamis Mushait:**
+* Al Tharfah District: https://maps.app.goo.gl/mp5jKJDvZmCo3fN58
+* Al Diyafa District: https://maps.app.goo.gl/2bPMoWxnCezzBTRn7
+
+
+4. **Madinah:**
+* Al Harrah Al Gharbiyah District: https://maps.app.goo.gl/UKXdWt55fL3VdJzR8
+
+
+5. **Hafar Al-Batin:**
+* Al Masif District: https://maps.app.goo.gl/2irsjbweCJT5axWJ8
+* Al Wahah District: https://maps.app.goo.gl/F1ji25q1GAxGU6Vd9
+
+
+6. **Sakaka Al-Jouf:**
+* Al Aziziyah District: https://maps.app.goo.gl/hK8Ye5R21ynr27tc7
+
+Important Note: There are no other branches other than the branches listed above.
 """
 load_dotenv()
 
@@ -261,61 +295,61 @@ def prepare_rag_context(message: str, history: List[Tuple[str, str]]):
     print(f"--- [DEBUG] Found {len(good_docs)} relevant documents ---")
 
 
-    # rag_prompt = f"""
-    # أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
-    # تستخدم المعلومات المتاحة للإجابة على استفسارات الزوار.
+    rag_prompt = f"""
+    أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
+    تستخدم المعلومات المتاحة للإجابة على  استفسارات زوار الموقع الإلكتروني الخاص بالمعهد.
 
-    # === البيانات الثابتة (GLOBAL_FACTS) ===
-    # {GLOBAL_FACTS}
+    === البيانات الثابتة (GLOBAL_FACTS) ===
+    {GLOBAL_FACTS}
 
-    # === المعلومات المسترجعة (Context) ===
-    # {knowledge}
+    === المعلومات المسترجعة (Context) ===
+    {knowledge}
 
-    # === تاريخ المحادثة (History) ===
-    # {formatted_history_text}
+    === تاريخ المحادثة (History) ===
+    {formatted_history_text}
 
-    # === تعليمات الإجابة (Guidelines) ===
-    # 1. البيانات أعلاه (Context & Facts) باللغة العربية، لكن يجب أن ترد بناءً على لغة المستخدم.
-    # 2. إذا سأل عن مدينة غير موجودة (مثل جدة، تبوك): اعتذر واذكر الفروع المتاحة.
-    # 3. عند السؤال عن الأسعار أو التسجيل: أرسل الرقم الموحد 920012673 ورقم الواتساب 0554194677.
-    # 4. كن مباشراً ومختصراً.
+    === تعليمات الإجابة (Guidelines) ===
+    1. البيانات أعلاه (Context & Facts) باللغة العربية، لكن يجب أن ترد بناءً على لغة المستخدم.
+    2. إذا سأل عن مدينة غير موجودة (مثل جدة، تبوك): اعتذر واذكر الفروع المتاحة.
+    3. عند السؤال عن الأسعار أو التسجيل: أرسل الرقم الموحد 920012673 ورقم الواتساب 0554194677.
+    4. كن مباشراً ومختصراً.
 
-    # === LANGUAGE PROTOCOL (CRITICAL) ===
-    # 1. **Detect User Language:** Check the last message sent by the user: "{message}".
-    # 2. **IF ARABIC:** Answer directly in Arabic.
-    # 3. **IF ENGLISH:** You MUST translate the relevant information from the Context/Facts into English and answer in English. - Example: If context says "فرع الرياض في حي الحمراء", and user asks "Where is Riyadh branch?", you MUST say: "The Riyadh branch is located in Al-Hamra district..." with the Google Map link.
+    === LANGUAGE PROTOCOL (CRITICAL) ===
+    1. **Detect User Language:** Check the last message sent by the user: "{message}".
+    2. **IF ARABIC:** Answer directly in Arabic.
+    3. **IF ENGLISH:** You MUST translate the relevant information from the Context/Facts into English and answer in English. - Example: If context says "فرع الرياض في حي الحمراء", and user asks "Where is Riyadh branch?", you MUST say: "The Riyadh branch is located in Al-Hamra district..." with the Google Map link.
 
-    # User: {message}
-    # Assistant:
-    # """
+    User: {message}
+    Assistant:
+    """
 
     # ===== الخطوة 5: بناء البرومبت النهائي =====
-    rag_prompt = f"""
-أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
-تساعد زوار الموقع الإلكتروني الخاص بالمعهد.
+#     rag_prompt = f"""
+# أنت مساعد ذكي للمعهد السعودي المتخصص العالي للتدريب.
+# تساعد زوار الموقع الإلكتروني الخاص بالمعهد.
 
-=== تعليمات مهمة ===
-1. راجع (GLOBAL_FACTS) دائماً قبل الإجابة عن الفروع والمواقع
-2. إذا سأل عن مدينة غير موجودة في القائمة (مثل عرعر، جدة، تبوك):
-   - قل بوضوح: "عذراً، لا يوجد لدينا فرع في هذه المدينة حالياً"
-   - اذكر له الفروع المتاحة كبديل
-3. إذا سأل عن فرع موجود، أعطه اسم الحي والرابط مباشرة
-4. لا تبدأ الإجابة بـ "الجواب:" أو "الإجابة هي" - ادخل في الموضوع مباشرة
-5. راقب تاريخ المحادثة: لا تكرر الشروط المستوفاة، أعط الخطوة التالية
-6. عند السؤال عن الأسعار أو الرغبة في التسجيل: أرسل الرقم الموحد 920012673 والرقم 0554194677 للواتساب
+# === تعليمات مهمة ===
+# 1. راجع (GLOBAL_FACTS) دائماً قبل الإجابة عن الفروع والمواقع
+# 2. إذا سأل عن مدينة غير موجودة في القائمة (مثل عرعر، جدة، تبوك):
+#    - قل بوضوح: "عذراً، لا يوجد لدينا فرع في هذه المدينة حالياً"
+#    - اذكر له الفروع المتاحة كبديل
+# 3. إذا سأل عن فرع موجود، أعطه اسم الحي والرابط مباشرة
+# 4. لا تبدأ الإجابة بـ "الجواب:" أو "الإجابة هي" - ادخل في الموضوع مباشرة
+# 5. راقب تاريخ المحادثة: لا تكرر الشروط المستوفاة، أعط الخطوة التالية
+# 6. عند السؤال عن الأسعار أو الرغبة في التسجيل: أرسل الرقم الموحد 920012673 والرقم 0554194677 للواتساب
 
-=== البيانات الثابتة (GLOBAL_FACTS) ===
-{GLOBAL_FACTS}
+# === البيانات الثابتة (GLOBAL_FACTS) ===
+# {GLOBAL_FACTS}
 
-=== المعلومات المسترجعة (Context) ===
-{knowledge}
+# === المعلومات المسترجعة (Context) ===
+# {knowledge}
 
-=== تاريخ المحادثة (History) ===
-{formatted_history_text}
+# === تاريخ المحادثة (History) ===
+# {formatted_history_text}
 
-User: {message}
-Assistant:
-"""
+# User: {message}
+# Assistant:
+# """
 
     return rag_prompt, search_query, good_docs, limited_history
 
