@@ -311,7 +311,7 @@ def prepare_rag_context(message: str, history: List[Tuple[str, str]]):
     === تعليمات الإجابة (Guidelines) ===
     1. البيانات أعلاه (Context & Facts) باللغة العربية، لكن يجب أن ترد بناءً على لغة المستخدم.
     2. إذا سأل عن مدينة غير موجودة (مثل جدة، تبوك): اعتذر واذكر الفروع المتاحة.
-    3. عند السؤال عن الأسعار أو التسجيل: أرسل الرقم الموحد 920012673 ورقم الواتساب 0554194677.
+    3. عند السؤال عن الأسعار أو التسجيل: أرسل الرقم الموحد 920012673 ورقم الواتساب 0507174578.
     4. كن مباشراً ومختصراً.
 
     === LANGUAGE PROTOCOL (CRITICAL) ===
@@ -418,6 +418,12 @@ async def chat_page(request: Request):
         return templates.TemplateResponse("user_maintenance.html", {"request": request})
     return templates.TemplateResponse("chat.html", {"request": request})
 
+@app.get("/chat-en", response_class=HTMLResponse)
+async def chat_page_en(request: Request):
+    if MAINTENANCE_MODE:
+        # تأكد إن عندك نسخة إنجليزي من صفحة الصيانة أو استخدم العادية
+        return templates.TemplateResponse("user_maintenance_en.html", {"request": request})
+    return templates.TemplateResponse("chat_en.html", {"request": request})
 
 @app.get("/health")
 def health_check():

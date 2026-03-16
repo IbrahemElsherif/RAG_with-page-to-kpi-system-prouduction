@@ -51,3 +51,5 @@ aws efs create-mount-target \
     --subnet-id <subnet-id> \
     --security-groups <security-group-id>
 ```
+W62ZTthTZ6A6prn
+https://d14hbi7dyty7wy.cloudfront.net/chat
