@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تقرير الـ Leads — أسبوع {{ week_num }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 30px; color: #2c3e50; background: #f9f7f2; }
+        h1 { color: #1a4332; border-bottom: 3px solid #1a4332; padding-bottom: 10px; }
+        .meta { color: #7f8c8d; font-size: 13px; margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        th { background: #1a4332; color: white; padding: 12px 15px; text-align: right; font-size: 13px; }
+        td { padding: 11px 15px; border-bottom: 1px solid #f0ede6; font-size: 13px; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f9f7f2; }
+        .tag { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .hot  { background: #fee2e2; color: #922b21; }
+        .warm { background: #fef9c3; color: #b7950b; }
+        .cold { background: #f1f5f9; color: #475569; }
+        .check { color: #1a4332; font-weight: bold; }
+        .cross { color: #aaa; }
+        footer { text-align: center; margin-top: 30px; color: #aaa; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<h1>تقرير الـ Leads الصادر من فريق تحليل البيانات — الأسبوع {{ week_num }}</h1>
+<div class="meta">
+    تاريخ الإصدار: {{ generated_at.strftime('%Y-%m-%d %H:%M') }} —
+    إجمالي الـ leads: <strong>{{ leads | length }}</strong>
+</div>
+
+{% if leads %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>رقم الموبايل</th>
+            <th>عدد الأسئلة</th>
+            <th>سعر؟</th>
+            <th>تسجيل؟</th>
+            <th>الحالة</th>
+            <th>ملاحظة</th>
+            <th>التاريخ</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lead in leads %}
+        <tr>
+            <td style="color:#aaa; font-family:monospace;">#{{ lead.id }}</td>
+            <td><strong>{{ lead.phone_number }}</strong></td>
+            <td>{{ lead.question_count }}</td>
+            <td>{% if lead.asked_about_price %}<span class="check">✓</span>{% else %}<span class="cross">—</span>{% endif %}</td>
+            <td>{% if lead.asked_about_registration %}<span class="check">✓</span>{% else %}<span class="cross">—</span>{% endif %}</td>
+            <td>
+                {% if lead.lead_status == 'hot' %}<span class="tag hot">🔥 Hot</span>
+                {% elif lead.lead_status == 'warm' %}<span class="tag warm">⚡ Warm</span>
+                {% else %}<span class="tag cold">Cold</span>{% endif %}
+            </td>
+            <td style="color:#7f8c8d;">{{ lead.admin_note or '—' }}</td>
+            <td style="color:#aaa; font-size:12px;">{{ lead.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="text-align:center; color:#aaa; padding:40px;">لا يوجد leads معتمدة بعد</p>
+{% endif %}
+
+<footer>
+    تقرير صادر من فريق تحليل البيانات — RAG Dashboard — {{ generated_at.strftime('%Y') }}
+</footer>
+
+</body>
+</html>

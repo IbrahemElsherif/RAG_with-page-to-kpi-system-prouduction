@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a4332 0%, #2d5a45 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #1a4332, #2d5a45);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .logo-area h4 {
+            color: #1a4332;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .logo-area small {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1px solid #e0dcd0;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: #1a4332;
+            box-shadow: 0 0 0 3px rgba(26,67,50,0.15);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #1a4332, #2d5a45);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 1rem;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .error-box {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-icon-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .input-icon-wrapper .form-control {
+            padding-left: 38px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="logo-area">
+        <div class="logo-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h4>Chatbot Dashboard</h4>
+        <small>سجّل دخولك للمتابعة</small>
+    </div>
+
+    {% if error %}
+    <div class="error-box">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form action="/dashboard/login" method="post">
+        <div class="mb-3">
+            <label class="form-label">اسم المستخدم</label>
+            <div class="input-icon-wrapper">
+                <i class="fas fa-user input-icon"></i>
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    placeholder="أدخل اسم المستخدم"
+                    required
+                    autofocus>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">كلمة المرور</label>
+            <div class="input-icon-wrapper">
+                <i class="fas fa-lock input-icon"></i>
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="••••••••"
+                    required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt me-2"></i>
+            دخول
+        </button>
+    </form>
+
+    <div style="text-align:center; margin-top:20px;">
+        <small style="color:#aaa; font-size:0.75rem;">
+            للحصول على حساب، تواصل مع قسم تحليل البيانات في المعهد السعودي المتخصص العالي للتدريب (SSTI).
+        </small>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

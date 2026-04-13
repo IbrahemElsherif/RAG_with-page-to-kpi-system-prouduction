@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Dashboard | Admin Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Cairo', sans-serif; color: #343a40; }
+
+        .navbar { background: linear-gradient(90deg, #1a4332, #2d5a45); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .navbar-brand { font-weight: 700; font-size: 1.2rem; }
+
+        /* Section tabs */
+        .nav-tabs-custom { border-bottom: 2px solid #dee2e6; margin-bottom: 25px; }
+        .nav-tabs-custom .nav-link {
+            color: #6c757d; font-weight: 600; border: none;
+            padding: 10px 20px; border-bottom: 3px solid transparent;
+        }
+        .nav-tabs-custom .nav-link.active {
+            color: #1a4332; border-bottom: 3px solid #1a4332; background: transparent;
+        }
+
+        /* Cards */
+        .control-card {
+            background: white; border: none; border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 20px;
+        }
+        .card-header-custom {
+            padding: 15px 20px; font-weight: 700; border-bottom: 1px solid #eee;
+            display: flex; align-items: center; gap: 10px; background: #fafafa;
+        }
+        .header-icon {
+            width: 36px; height: 36px; display: flex; align-items: center;
+            justify-content: center; border-radius: 8px; font-size: 1rem;
+        }
+
+        /* Stat boxes */
+        .stat-box {
+            background: #f8f9fa; border-radius: 10px; padding: 15px;
+            text-align: center; border: 1px dashed #dee2e6;
+        }
+        .stat-number { font-size: 2rem; font-weight: bold; }
+        .stat-label { font-size: 0.85rem; color: #6c757d; }
+
+        /* Leads table */
+        .leads-table th { font-size: 12px; color: #6c757d; border-bottom: 2px solid #eee; }
+        .leads-table td { font-size: 13px; vertical-align: middle; }
+        .leads-table tr:hover { background: #f8f9fa; }
+
+        /* Status badges */
+        .badge-hot { background: #fee2e2; color: #922b21; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-warm { background: #fef9c3; color: #854d0e; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-cold { background: #f1f5f9; color: #475569; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-pending { background: #fff7ed; color: #c2410c; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-approved { background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+        /* Action buttons */
+        .btn-approve { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-size: 12px; padding: 4px 12px; border-radius: 6px; }
+        .btn-approve:hover { background: #16a34a; color: white; }
+        .btn-reject { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-size: 12px; padding: 4px 12px; border-radius: 6px; }
+        .btn-reject:hover { background: #dc2626; color: white; }
+
+        /* Section toggle */
+        .section-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid #f1f1f1;
+        }
+        .section-row:last-child { border-bottom: none; }
+        .section-name { font-weight: 600; font-size: 14px; }
+        .section-status { font-size: 12px; color: #6c757d; }
+
+        /* Toggle switch */
+        .form-switch .form-check-input { width: 42px; height: 22px; cursor: pointer; }
+        .form-check-input:checked { background-color: #1a4332; border-color: #1a4332; }
+
+        /* User table */
+        .user-badge-admin { background: #ede9fe; color: #5b21b6; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+        .user-badge-sales { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+
+        /* Note textarea */
+        .note-textarea { border-radius: 10px; border: 1px solid #dee2e6; font-family: 'Cairo', sans-serif; resize: vertical; }
+        .note-textarea:focus { border-color: #1a4332; box-shadow: 0 0 0 3px rgba(26,67,50,0.1); outline: none; }
+
+        /* Phone reveal */
+        .phone-blur { filter: blur(4px); user-select: none; transition: 0.3s; }
+        .phone-reveal { filter: none; }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 20px; left: 20px; z-index: 9999; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark mb-4">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand">
+            <i class="fas fa-sliders-h me-2"></i> Track Dashboard
+            <small class="ms-2 opacity-75" style="font-size:0.75rem;">مرحباً، {{ username }}</small>
+        </span>
+        <div class="d-flex gap-2">
+            <a href="/admin/maintenance" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-cogs me-1"></i> Maintenance
+            </a>
+            <a href="/dashboard" class="btn btn-light btn-sm fw-bold text-success" target="_blank">
+                <i class="fas fa-eye me-1"></i> معاينة الـ Dashboard
+            </a>
+            <button class="btn btn-outline-light btn-sm position-relative" onclick="loadNotifications()">
+                <i class="fas fa-bell"></i>
+                <span id="notif-badge" class="position-absolute top-0 start-0 translate-middle
+                    badge rounded-pill bg-danger" style="display:none;">0</span>
+            </button>
+            <a href="/dashboard/logout" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-sign-out-alt me-1"></i> خروج
+            </a>
+          
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4">
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-box">
+                <div class="stat-number text-dark">{{ total_leads }}</div>
+                <div class="stat-label">إجمالي الـ Leads</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <div class="stat-number" style="color:#922b21;">{{ hot_leads }}</div>
+                <div class="stat-label">Hot Leads 🔥</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <div class="stat-number" style="color:#1a4332;">{{ week_num }}</div>
+                <div class="stat-label">الأسبوع الحالي</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs-custom" id="mainTabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#" onclick="showTab('leads')">
+                <i class="fas fa-users me-1"></i> Leads
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('note')">
+                <i class="fas fa-pen me-1"></i> الملاحظة الأسبوعية
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('sections')">
+                <i class="fas fa-toggle-on me-1"></i> تحكم في الأقسام
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('users')">
+                <i class="fas fa-user-cog me-1"></i> إدارة المستخدمين
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('categories')">
+                <i class="fas fa-tags me-1"></i> تصنيف الأسئلة
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('peakhours')">
+                <i class="fas fa-chart-bar me-1"></i> تقارير الذروة
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showTab('repeated')">
+                <i class="fas fa-redo me-1"></i> زوار متكررون
+            </a>
+        </li>
+    </ul>
+
+    <!-- ===== TAB: LEADS ===== -->
+    <div id="tab-leads">
+        <div class="control-card">
+            <div class="card-header-custom" style="justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="header-icon" style="background:#fee2e2; color:#922b21;"><i class="fas fa-fire"></i></div>
+                                <div>جميع الـ Leads — موافقتك تحدد ما يظهر للمبيعات</div>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="number" id="export-week" min="1" max="52" value="{{ week_num }}" class="form-control form-control-sm" style="width:80px;" placeholder="الأسبوع">
+                                <input type="number" id="export-year" min="2024" max="2030" value="{{ now.year if now else '' }}" class="form-control form-control-sm" style="width:80px;" placeholder="السنة">
+                                <button onclick="exportLeadsHTML()" class="btn btn-success btn-sm fw-bold">
+                                    <i class="fas fa-file-alt me-1"></i> تصدير HTML
+                                </button>
+                            </div>
+                        </div>
+            <div class="card-body p-0">
+                {% if leads %}
+                <div class="table-responsive">
+                    <table class="table leads-table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3">الحالة</th>
+                                <th>Session ID</th>
+                                <th>رقم الموبايل</th>
+                                <th>أسئلة</th>
+                                <th>سعر؟</th>
+                                <th>تسجيل؟</th>
+                                <th>Lead Status</th>
+                                <th>التاريخ</th>
+                                <th>ملاحظة</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lead in leads %}
+                            <tr id="lead-row-{{ lead.id }}">
+
+                                <td>
+                                    <small class="text-muted font-monospace">{{ lead.session_id[:12] }}...</small>
+                                </td>
+                                <td>
+                                    <span class="phone-blur" id="phone-{{ lead.id }}">{{ lead.phone_number }}</span>
+                                    <button class="btn btn-link btn-sm p-0 ms-1 text-primary" onclick="togglePhone({{ lead.id }})">
+                                        <i class="fas fa-eye" id="eye-{{ lead.id }}"></i>
+                                    </button>
+                                </td>
+                                <td><strong>{{ lead.question_count }}</strong></td>
+                                <td>
+                                    {% if lead.asked_about_price %}
+                                        <i class="fas fa-check-circle text-danger"></i>
+                                    {% else %}
+                                        <i class="fas fa-times text-muted"></i>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if lead.asked_about_registration %}
+                                        <i class="fas fa-check-circle text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-times text-muted"></i>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if lead.lead_status == 'hot' %}
+                                        <span class="badge-hot">🔥 Hot</span>
+                                    {% elif lead.lead_status == 'warm' %}
+                                        <span class="badge-warm">⚡ Warm</span>
+                                    {% else %}
+                                        <span class="badge-cold">Cold</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ lead.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                                <td>
+                                    <input type="text"
+                                        class="form-control form-control-sm"
+                                        style="min-width:140px; font-size:12px;"
+                                        placeholder="أضف ملاحظة..."
+                                        value="{{ lead.admin_note or '' }}"
+                                        onblur="saveNote({{ lead.id }}, this.value)">
+                                </td>
+                                <td>
+                                    <button class="btn btn-reject" onclick="rejectLead({{ lead.id }})">
+                                        <i class="fas fa-trash me-1"></i> Reject
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                    <p>لا يوجد leads بعد — ستظهر هنا تلقائياً عندما يدخل العملاء أرقامهم</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB: WEEKLY NOTE ===== -->
+    <div id="tab-note" style="display:none;">
+        <div class="control-card">
+            <div class="card-header-custom">
+                <div class="header-icon" style="background:#ede9fe; color:#5b21b6;"><i class="fas fa-pen"></i></div>
+                <div>الملاحظة الأسبوعية — أسبوع {{ week_num }}</div>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-3" style="font-size:13px;">
+                    <i class="fas fa-info-circle me-1"></i>
+                    اكتب الملاحظة أولاً ثم اضغط "نشر" — لن تظهر للمبيعات حتى تنشرها أنت.
+                </p>
+                <textarea id="weeklyNoteContent" class="form-control note-textarea mb-3" rows="5"
+                    placeholder="مثال: الـ hot leads زادت 15% هذا الأسبوع، ينصح بالتركيز على استفسارات الأسعار...">{{ weekly_note.content if weekly_note else '' }}</textarea>
+
+                <div class="d-flex gap-2 align-items-center">
+                    <button class="btn btn-outline-secondary" onclick="saveNote_weekly()">
+                        <i class="fas fa-save me-1"></i> حفظ مسودة
+                    </button>
+                    <button class="btn btn-success" onclick="publishNote()">
+                        <i class="fas fa-paper-plane me-1"></i> نشر للمبيعات الآن
+                    </button>
+                    {% if weekly_note and weekly_note.is_published %}
+                    <span class="text-success ms-2" style="font-size:13px;">
+                        <i class="fas fa-check-circle me-1"></i>
+                        منشورة منذ {{ weekly_note.published_at.strftime('%H:%M') if weekly_note.published_at else '' }}
+                    </span>
+                    {% else %}
+                    <span class="text-warning ms-2" style="font-size:13px;">
+                        <i class="fas fa-clock me-1"></i> مسودة — غير منشورة بعد
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- ===== TAB: SECTIONS ===== -->
+    <div id="tab-sections" style="display:none;">
+        <div class="control-card">
+            <div class="card-header-custom">
+                <div class="header-icon" style="background:#dcfce7; color:#166534;">
+                    <i class="fas fa-toggle-on"></i>
+                </div>
+                <div>تحكم في أقسام الـ Dashboard — ما تشغّله فقط يظهر للمبيعات</div>
+            </div>
+            <div class="card-body p-4">
+                {% if sections %}
+                    {% for section in sections %}
+                    <div class="section-row">
+                        <div>
+                            <div class="section-name">{{ section.section_name }}</div>
+                            <div class="section-status">
+                                Key: <code>{{ section.section_key }}</code> —
+                                آخر تحديث: {{ section.last_updated.strftime('%Y-%m-%d %H:%M') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox"
+                                id="section-{{ section.section_key }}"
+                                {% if section.is_visible %}checked{% endif %}
+                                onchange="toggleSection('{{ section.section_key }}', this)">
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <p class="text-muted text-center py-3">
+                    لا توجد أقسام — ستظهر تلقائياً عند أول تشغيل للسيرفر
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TAB: USERS ===== -->
+    <div id="tab-users" style="display:none;">
+        <div class="row g-4">
+
+            <!-- Create user form -->
+            <div class="col-md-4">
+                <div class="control-card">
+                    <div class="card-header-custom">
+                        <div class="header-icon" style="background:#e0f2fe; color:#0369a1;"><i class="fas fa-user-plus"></i></div>
+                        <div>إضافة مستخدم جديد</div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">اسم المستخدم</label>
+                            <input type="text" id="new-username" class="form-control" placeholder="ahmed_sales">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">كلمة المرور</label>
+                            <input type="password" id="new-password" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">الصلاحية</label>
+                            <select id="new-role" class="form-select">
+                                <option value="sales">Sales — مبيعات</option>
+                                <option value="admin">Admin — مدير</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-success w-100 fw-bold" onclick="createUser()">
+                            <i class="fas fa-plus me-1"></i> إنشاء المستخدم
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users list -->
+            <div class="col-md-8">
+                <div class="control-card">
+                    <div class="card-header-custom">
+                        <div class="header-icon" style="background:#f3e8ff; color:#7c3aed;"><i class="fas fa-users"></i></div>
+                        <div>المستخدمون الحاليون</div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0" style="font-size:13px;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-3">المستخدم</th>
+                                    <th>الصلاحية</th>
+                                    <th>الحالة</th>
+                                    <th>آخر دخول</th>
+                                    <th>إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody">
+                                {% for user in users %}
+                                <tr id="user-row-{{ user.id }}">
+                                    <td class="px-3 fw-bold">{{ user.username }}</td>
+                                    <td>
+                                        {% if user.role == 'admin' %}
+                                            <span class="user-badge-admin">Admin</span>
+                                        {% else %}
+                                            <span class="user-badge-sales">Sales</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'لم يدخل بعد' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-warning me-1"
+                                            onclick="toggleUser({{ user.id }}, '{{ user.username }}')">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" class="text-center text-muted py-4">لا يوجد مستخدمون بعد</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== TAB: CATEGORIES for chats ====== -->
+    <div id="tab-categories" style="display:none;">
+        <div class="row g-4">
+
+            <!-- Create category -->
+            <div class="col-md-4">
+                <div class="control-card">
+                    <div class="card-header-custom">
+                        <div class="header-icon" style="background:#fef9c3; color:#854d0e;">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div>إضافة تصنيف جديد</div>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">
+                                اسم التصنيف
+                            </label>
+                            <input type="text" id="cat-name" class="form-control"
+                                placeholder="مثال: تخصصات">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size:13px;">
+                                وصف للـ GPT
+                            </label>
+                            <textarea id="cat-desc" class="form-control" rows="3"
+                                placeholder="مثال: أسئلة عن التخصصات والدبلومات والدورات المتاحة في المعهد"></textarea>
+                            <small class="text-muted" style="font-size:11px;">
+                                الوصف ده GPT بيستخدمه عشان يفهم يصنف الأسئلة صح
+                            </small>
+                        </div>
+                        <button class="btn btn-warning w-100 fw-bold" onclick="createCategory()">
+                            <i class="fas fa-plus me-1"></i> إضافة التصنيف
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories list -->
+            <div class="col-md-8">
+                <div class="control-card">
+                    <div class="card-header-custom">
+                        <div class="header-icon" style="background:#fef9c3; color:#854d0e;">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div>التصنيفات الحالية</div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="categories-list" style="padding:10px;">
+                            <p class="text-muted text-center py-3" style="font-size:13px;">
+                                جاري التحميل...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Questions preview per category -->
+                <div class="control-card" style="margin-top:16px;">
+                    <div class="card-header-custom">
+                        <div class="header-icon" style="background:#e0f2fe; color:#0369a1;">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div>معاينة الأسئلة المصنفة</div>
+                    </div>
+                    <div class="card-body p-3" id="cat-questions-preview">
+                        <p class="text-muted text-center py-2" style="font-size:13px;">
+                            اضغط على تصنيف لمعاينة أسئلته
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- ===== TAB: PEAK HOURS ===== -->
+    <div id="tab-peakhours" style="display:none;">
+        <div class="control-card">
+            <div class="card-header-custom">
+                <div class="header-icon" style="background:#fef9c3; color:#854d0e;">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div>تقارير أوقات الذروة</div>
+            </div>
+            <div class="card-body p-4">
+
+                <!-- Weekly report -->
+                <div style="margin-bottom:24px;">
+                    <h6 class="fw-bold mb-3" style="color:#1a4332; font-size:14px;">
+                        <i class="fas fa-calendar-week me-1"></i> تقرير أسبوعي
+                    </h6>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <div>
+                            <label style="font-size:12px; color:#6c757d; display:block; margin-bottom:4px;">
+                                رقم الأسبوع
+                            </label>
+                            <input type="number" id="weekly-week" min="1" max="52"
+                                value="{{ now.isocalendar()[1] if now else '' }}"
+                                class="form-control form-control-sm" style="width:100px;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:#6c757d; display:block; margin-bottom:4px;">
+                                السنة
+                            </label>
+                            <input type="number" id="weekly-year" min="2024" max="2030"
+                                value="{{ now.year if now else '' }}"
+                                class="form-control form-control-sm" style="width:100px;">
+                        </div>
+                        <div style="margin-top:18px;">
+                            <a id="weekly-btn" href="#"
+                                onclick="downloadWeeklyReport()"
+                                class="btn btn-success btn-sm fw-bold">
+                                <i class="fas fa-download me-1"></i> توليد وتحميل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border-color:#e0dcd0;">
+
+                <!-- Monthly report -->
+                <div style="margin-top:20px;">
+                    <h6 class="fw-bold mb-3" style="color:#1a4332; font-size:14px;">
+                        <i class="fas fa-calendar-alt me-1"></i> تقرير شهري
+                    </h6>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <div>
+                            <label style="font-size:12px; color:#6c757d; display:block; margin-bottom:4px;">
+                                الشهر
+                            </label>
+                            <select id="monthly-month" class="form-select form-select-sm" style="width:130px;">
+                                <option value="1">يناير</option>
+                                <option value="2">فبراير</option>
+                                <option value="3">مارس</option>
+                                <option value="4">أبريل</option>
+                                <option value="5">مايو</option>
+                                <option value="6">يونيو</option>
+                                <option value="7">يوليو</option>
+                                <option value="8">أغسطس</option>
+                                <option value="9">سبتمبر</option>
+                                <option value="10">أكتوبر</option>
+                                <option value="11">نوفمبر</option>
+                                <option value="12">ديسمبر</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:#6c757d; display:block; margin-bottom:4px;">
+                                السنة
+                            </label>
+                            <input type="number" id="monthly-year" min="2024" max="2030"
+                                value="{{ now.year if now else '' }}"
+                                class="form-control form-control-sm" style="width:100px;">
+                        </div>
+                        <div style="margin-top:18px;">
+                            <a id="monthly-btn" href="#"
+                                onclick="downloadMonthlyReport()"
+                                class="btn btn-primary btn-sm fw-bold">
+                                <i class="fas fa-download me-1"></i> توليد وتحميل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-container">
+    <div id="mainToast" class="toast align-items-center text-white border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-bold" id="toastMsg">تم بنجاح</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications Panel -->
+<div id="notifPanel" style="display:none; position:fixed; top:70px; left:20px; 
+     width:360px; background:white; border-radius:15px; 
+     box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:9999; overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#1a4332,#2d5a45); 
+                color:white; padding:14px 18px; display:flex; 
+                justify-content:space-between; align-items:center;">
+        <span style="font-weight:700; font-size:14px;">
+            <i class="fas fa-bell me-2"></i> طلبات التقارير
+        </span>
+        <button onclick="document.getElementById('notifPanel').style.display='none'"
+            style="background:rgba(255,255,255,0.2); border:none; color:white; 
+                   width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:13px;">
+            ✕
+        </button>
+    </div>
+    <div id="notifList" style="max-height:400px; overflow-y:auto; padding:10px;">
+        <p style="text-align:center; color:#aaa; font-size:13px; padding:20px;">
+            جاري التحميل...
+        </p>
+    </div>
+</div>
+
+<!-- ===== TAB: REPEATED VISITORS ===== -->
+<div id="tab-repeated" style="display:none;">
+    <div class="control-card">
+        <div class="card-header-custom">
+            <div class="header-icon" style="background:#fef9c3; color:#854d0e;">
+                <i class="fas fa-redo"></i>
+            </div>
+            <div>العملاء الذين دخلوا أكثر من مرة</div>
+        </div>
+        <!-- Daily with date picker -->
+        <div style="display:flex; gap:8px; align-items:flex-end; margin-bottom:10px; flex-wrap:wrap;">
+            <div>
+                <label style="font-size:12px; color:#6c757d; display:block; margin-bottom:4px;">اليوم</label>
+                <input type="date" id="rep-daily-date" 
+                    value="{{ now.strftime('%Y-%m-%d') }}"
+                    class="form-control form-control-sm" style="width:160px;">
+            </div>
+            <button onclick="exportRepeatedHTML('daily')" 
+                class="btn btn-success btn-sm fw-bold">
+                <i class="fas fa-download me-1"></i> تصدير يومي
+            </button>
+        </div>
+
+        <!-- Weekly -->
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+            <button onclick="exportRepeatedHTML('weekly')" 
+                class="btn btn-primary btn-sm fw-bold">
+                <i class="fas fa-download me-1"></i> تصدير أسبوعي
+            </button>
+        </div>
+
+        <!-- Monthly -->
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button onclick="exportRepeatedHTML('monthly')" 
+                class="btn btn-warning btn-sm fw-bold">
+                <i class="fas fa-download me-1"></i> تصدير شهري
+            </button>
+        </div>
+
+            <div id="repeated-container">
+                <p class="text-muted text-center py-3" style="font-size:13px;">
+                    جاري التحميل...
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section visibility toggle -->
+    <div class="control-card" style="margin-top:16px;">
+        <div class="card-header-custom">
+            <div class="header-icon" style="background:#dcfce7; color:#166534;">
+                <i class="fas fa-toggle-on"></i>
+            </div>
+            <div>تحكم في ظهور القسم في الـ dashboard</div>
+        </div>
+        <div class="card-body p-3">
+            <div class="section-row">
+                <div>
+                    <div class="section-name">قسم الزوار المتكررين</div>
+                    <div class="section-status">يظهر في الـ dashboard للمبيعات</div>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox"
+                        id="section-repeated_visitors"
+                        onchange="toggleSection('repeated_visitors', this)">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ---------------------------------------------------------------------------
+// Tab switching
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Toast helper
+// ---------------------------------------------------------------------------
+function showToast(msg, success = true) {
+    const toast = document.getElementById('mainToast');
+    toast.className = `toast align-items-center text-white border-0 bg-${success ? 'success' : 'danger'}`;
+    document.getElementById('toastMsg').textContent = msg;
+    new bootstrap.Toast(toast, { delay: 3000 }).show();
+}
+
+// ---------------------------------------------------------------------------
+// Phone reveal
+// ---------------------------------------------------------------------------
+function togglePhone(id) {
+    const span = document.getElementById('phone-' + id);
+    const eye = document.getElementById('eye-' + id);
+    if (span.classList.contains('phone-blur')) {
+        span.classList.remove('phone-blur');
+        span.classList.add('phone-reveal');
+        eye.className = 'fas fa-eye-slash';
+    } else {
+        span.classList.add('phone-blur');
+        span.classList.remove('phone-reveal');
+        eye.className = 'fas fa-eye';
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Lead actions
+// ---------------------------------------------------------------------------
+
+async function rejectLead(id) {
+    if (!confirm('هتحذف الـ lead ده نهائياً؟')) return;
+    const res = await fetch(`/trackdashboard/leads/${id}/reject`, { method: 'POST' });
+    if (res.ok) {
+        document.getElementById('lead-row-' + id)?.remove();
+        showToast('تم الحذف');
+    } else {
+        showToast('خطأ أثناء الحذف', false);
+    }
+}
+
+async function saveNote(leadId, note) {
+    await fetch(`/trackdashboard/leads/${leadId}/note`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ admin_note: note })
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Weekly note
+// ---------------------------------------------------------------------------
+async function saveNote_weekly() {
+    const content = document.getElementById('weeklyNoteContent').value;
+    const res = await fetch('/trackdashboard/weekly-note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `content=${encodeURIComponent(content)}`
+    });
+    res.ok ? showToast('تم حفظ المسودة') : showToast('خطأ في الحفظ', false);
+}
+
+async function publishNote() {
+    const content = document.getElementById('weeklyNoteContent').value;
+    // Save first, then publish
+    await fetch('/trackdashboard/weekly-note', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `content=${encodeURIComponent(content)}`
+    });
+    const res = await fetch('/trackdashboard/weekly-note/publish', { method: 'POST' });
+    res.ok ? showToast('تم النشر — الملاحظة ظاهرة للمبيعات الآن ✓') : showToast('خطأ في النشر', false);
+}
+
+// ---------------------------------------------------------------------------
+// Section toggles
+// ---------------------------------------------------------------------------
+async function toggleSection(key, checkbox) {
+    const res = await fetch(`/trackdashboard/sections/${key}/toggle`, { method: 'POST' });
+    if (res.ok) {
+        const data = await res.json();
+        showToast(`${key}: ${data.is_visible ? 'ظاهر الآن ✓' : 'مخفي الآن'}`);
+    } else {
+        checkbox.checked = !checkbox.checked; // revert on error
+        showToast('خطأ في التحديث', false);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// User management
+// ---------------------------------------------------------------------------
+async function createUser() {
+    const username = document.getElementById('new-username').value.trim();
+    const password = document.getElementById('new-password').value;
+    const role = document.getElementById('new-role').value;
+
+    if (!username || !password) { showToast('اكتب الاسم وكلمة المرور', false); return; }
+
+    const form = new FormData();
+    form.append('username', username);
+    form.append('password', password);
+    form.append('role', role);
+
+    const res = await fetch('/trackdashboard/users/create', { method: 'POST', body: form });
+    if (res.ok) {
+        showToast(`تم إنشاء المستخدم: ${username}`);
+        setTimeout(() => location.reload(), 1200);
+    } else {
+        const err = await res.json();
+        showToast(err.detail || 'خطأ في الإنشاء', false);
+    }
+}
+
+async function toggleUser(id, name) {
+    const res = await fetch(`/trackdashboard/users/${id}/toggle`, { method: 'POST' });
+    if (res.ok) {
+        showToast(`تم تغيير حالة ${name}`);
+        setTimeout(() => location.reload(), 1200);
+    } else {
+        showToast('خطأ', false);
+    }
+}
+
+async function deleteUser(id, name) {
+    if (!confirm(`هتحذف المستخدم "${name}" نهائياً؟`)) return;
+    const res = await fetch(`/trackdashboard/users/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById('user-row-' + id)?.remove();
+        showToast(`تم حذف ${name}`);
+    } else {
+        showToast('خطأ في الحذف', false);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+async function loadNotifications() {
+    const panel = document.getElementById('notifPanel');
+    const list  = document.getElementById('notifList');
+
+    // Toggle panel
+    if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+        return;
+    }
+    panel.style.display = 'block';
+
+    const res = await fetch('/trackdashboard/notifications');
+    if (!res.ok) { list.innerHTML = '<p style="color:red;text-align:center;">خطأ في التحميل</p>'; return; }
+    const data = await res.json();
+
+    if (data.length === 0) {
+        list.innerHTML = `
+            <div style="text-align:center; padding:30px; color:#aaa;">
+                <div style="font-size:30px; margin-bottom:8px;">🎉</div>
+                <p style="font-size:13px; margin:0;">مفيش طلبات جديدة</p>
+            </div>`;
+        return;
+    }
+
+    const typeLabels = {
+        leads:       'بيانات العملاء الكاملة',
+        questions:   'تحليل الأسئلة',
+        peak_hours:  'تقرير أوقات الذروة',
+        repeated_visitors:  'الزوار المتكررون',
+    };
+
+list.innerHTML = data.map(n => `
+    <div id="notif-item-${n.id}" style="background:#f9f7f2; border-radius:10px;
+         padding:12px 14px; margin-bottom:8px; border-right:3px solid #1a4332;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+            <span style="font-weight:700; font-size:13px; color:#1a4332;">
+                📋 ${typeLabels[n.report_type] || n.report_type}
+            </span>
+            <small style="color:#aaa; font-size:11px;">${n.created_at}</small>
+        </div>
+        <div style="font-size:12px; color:#555; margin-bottom:8px;">
+            <i class="fas fa-user" style="color:#aaa;"></i>
+            طلب من: <strong>${n.requested_by}</strong> — أسبوع ${n.week_number}
+        </div>
+        ${n.note ? `<div style="font-size:12px; color:#777; background:white;
+            padding:6px 10px; border-radius:6px; margin-bottom:10px; border:1px solid #eee;">
+            💬 ${n.note}</div>` : ''}
+
+        <!-- Upload form per notification -->
+        <div style="background:white; border-radius:8px; padding:10px; border:1px dashed #ccc;">
+            <label style="font-size:12px; font-weight:700; color:#1a4332; display:block; margin-bottom:6px;">
+                <i class="fas fa-upload me-1"></i> ارفع التقرير رداً على هذا الطلب
+            </label>
+            <input type="file" id="file-${n.id}" accept=".html"
+                style="font-size:12px; width:100%; margin-bottom:8px;">
+            <button onclick="uploadReportForRequest(${n.id})"
+                style="background:#1a4332; color:white; border:none; padding:6px 14px;
+                       border-radius:6px; font-size:12px; cursor:pointer; width:100%;">
+                <i class="fas fa-paper-plane me-1"></i> رفع وإرسال للمبيعات
+            </button>
+        </div>
+    </div>
+`).join('');
+}
+
+async function markSeen(id) {
+    const res = await fetch(`/trackdashboard/notifications/${id}/seen`, { method: 'POST' });
+    if (res.ok) {
+        document.getElementById(`notif-item-${id}`)?.remove();
+
+        // Update badge
+        const badge = document.getElementById('notif-badge');
+        const current = parseInt(badge.textContent) - 1;
+        if (current <= 0) {
+            badge.style.display = 'none';
+            document.getElementById('notifList').innerHTML = `
+                <div style="text-align:center; padding:30px; color:#aaa;">
+                    <div style="font-size:30px; margin-bottom:8px;">🎉</div>
+                    <p style="font-size:13px; margin:0;">مفيش طلبات جديدة</p>
+                </div>`;
+        } else {
+            badge.textContent = current;
+        }
+        showToast('تم تحديد الطلب كمقروء ✓');
+    }
+}
+// Check notifications on page load
+window.addEventListener('load', async () => {
+    const res = await fetch('/trackdashboard/notifications');
+    if (!res.ok) return;
+    const data = await res.json();
+    const badge = document.getElementById('notif-badge');
+    if (data.length > 0) {
+        badge.style.display = 'block';
+        badge.textContent = data.length;
+    }
+});
+async function uploadReportForRequest(reqId) {
+    const fileInput = document.getElementById(`file-${reqId}`);
+    const file = fileInput?.files[0];
+    if (!file) { showToast('اختار ملف HTML أولاً', false); return; }
+
+    const form = new FormData();
+    form.append('file', file);
+
+    const res = await fetch(
+        `/trackdashboard/notifications/${reqId}/upload-report`,
+        { method: 'POST', body: form }
+    );
+    if (res.ok) {
+        document.getElementById(`notif-item-${reqId}`)?.remove();
+        const badge = document.getElementById('notif-badge');
+        const current = parseInt(badge.textContent) - 1;
+        if (current <= 0) badge.style.display = 'none';
+        else badge.textContent = current;
+        showToast('تم رفع التقرير ✓ — المبيعات يقدروا يشوفوه دلوقتي');
+    } else {
+        showToast('خطأ في الرفع', false);
+    }
+}
+// ---------------------------------------------------------------------------
+// Categories management
+// ---------------------------------------------------------------------------
+async function loadCategories() {
+    const res = await fetch('/trackdashboard/categories/data');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const container = document.getElementById('categories-list');
+
+    if (data.length === 0) {
+        container.innerHTML = `
+            <p class="text-muted text-center py-3" style="font-size:13px;">
+                لا يوجد تصنيفات بعد — أضف أول تصنيف
+            </p>`;
+        return;
+    }
+
+    container.innerHTML = data.map(cat => `
+        <div id="cat-row-${cat.id}" class="section-row">
+            <div>
+                <div class="section-name">${cat.name}</div>
+                <div class="section-status" style="font-size:11px; color:#aaa;">
+                    ${cat.description}
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button class="btn btn-sm btn-outline-info"
+                    onclick="previewCategoryQuestions(${cat.id}, '${cat.name}')">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox"
+                        id="cat-toggle-${cat.id}"
+                        ${cat.is_visible ? 'checked' : ''}
+                        onchange="toggleCategory(${cat.id}, this)">
+                </div>
+                <button class="btn btn-sm btn-outline-danger"
+                    onclick="deleteCategory(${cat.id}, '${cat.name}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function createCategory() {
+    const name = document.getElementById('cat-name').value.trim();
+    const desc = document.getElementById('cat-desc').value.trim();
+    if (!name || !desc) { showToast('اكتب الاسم والوصف', false); return; }
+
+    const form = new FormData();
+    form.append('name', name);
+    form.append('description', desc);
+
+    const res = await fetch('/trackdashboard/categories/create', {
+        method: 'POST', body: form
+    });
+    if (res.ok) {
+        document.getElementById('cat-name').value = '';
+        document.getElementById('cat-desc').value = '';
+        showToast(`تم إضافة تصنيف "${name}" ✓`);
+        loadCategories();
+    } else {
+        const err = await res.json();
+        showToast(err.detail || 'خطأ في الإضافة', false);
+    }
+}
+
+async function toggleCategory(id, checkbox) {
+    const res = await fetch(`/trackdashboard/categories/${id}/toggle`, { method: 'POST' });
+    if (res.ok) {
+        const data = await res.json();
+        showToast(`${data.is_visible ? 'ظاهر للمبيعات ✓' : 'مخفي'}`);
+    } else {
+        checkbox.checked = !checkbox.checked;
+        showToast('خطأ في التحديث', false);
+    }
+}
+
+async function deleteCategory(id, name) {
+    if (!confirm(`هتحذف تصنيف "${name}" نهائياً؟`)) return;
+    const res = await fetch(`/trackdashboard/categories/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        document.getElementById(`cat-row-${id}`)?.remove();
+        showToast(`تم حذف "${name}"`);
+    } else {
+        showToast('خطأ في الحذف', false);
+    }
+}
+
+function renderQA(questions) {
+    return questions.map((q, i) => `
+        <div style="background:white; border-radius:8px; padding:12px;
+                    margin-bottom:8px; border-right:3px solid #1a4332;">
+            <div style="font-weight:700; font-size:13px; 
+                        color:#2c3e50; margin-bottom:6px;">
+                ${i + 1}. ${q.user_query}
+            </div>
+            <div style="font-size:12px; color:#555; line-height:1.6;
+                        border-top:1px solid #e0dcd0; padding-top:6px;">
+                ${q.bot_answer}
+            </div>
+            <div style="font-size:11px; color:#aaa; margin-top:4px;">
+                ${q.timestamp}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function previewCategoryQuestions(id, name) {
+    const res = await fetch(`/trackdashboard/categories/${id}/questions`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const preview = document.getElementById('cat-questions-preview');
+
+    const totalQ = data.contacts.reduce((s, c) => s + c.questions.length, 0) + data.no_phone.length;
+
+    if (totalQ === 0) {
+        preview.innerHTML = `<p class="text-muted text-center py-2" style="font-size:13px;">
+            لا توجد أسئلة مصنفة تحت "${name}" بعد</p>`;
+        return;
+    }
+
+    let html = `
+        <div style="display:flex; justify-content:space-between; 
+                    align-items:center; margin-bottom:12px;">
+            <div style="font-weight:700; font-size:13px; color:#1a4332;">
+                ${name} — ${totalQ} سؤال — 
+                <span style="color:#7f8c8d;">${data.contacts.length} عميل برقم</span>
+            </div>
+            <button onclick="exportCategoryHTML(${id}, '${name}')"
+                style="background:#1a4332; color:white; border:none;
+                       padding:5px 14px; border-radius:6px; 
+                       font-size:12px; cursor:pointer;">
+                <i class="fas fa-download me-1"></i> تصدير HTML
+            </button>
+        </div>`;
+
+    // Contacts with phone
+    data.contacts.forEach(c => {
+        html += `
+        <div style="background:#f9f7f2; border-radius:10px; padding:14px;
+                    margin-bottom:12px; border:1px solid #e0dcd0;">
+            <div style="font-weight:700; font-size:13px; color:#1a4332; 
+                        margin-bottom:10px;">
+                📱 ${c.phone}
+                <span style="font-size:11px; color:#aaa; margin-right:8px;">
+                    ${c.first_seen}
+                </span>
+            </div>
+            ${renderQA(c.questions)}
+        </div>`;
+    });
+
+    // No phone
+    if (data.no_phone.length > 0) {
+        html += `
+        <div style="background:#f9f7f2; border-radius:10px; padding:14px;
+                    margin-bottom:12px; border:1px dashed #ccc;">
+            <div style="font-weight:700; font-size:13px; color:#aaa; 
+                        margin-bottom:10px;">
+                بدون رقم موبايل (${data.no_phone.length} سؤال)
+            </div>
+            ${renderQA(data.no_phone)}
+        </div>`;
+    }
+
+    preview.innerHTML = html;
+}
+
+async function exportCategoryHTML(id, name) {
+    const res = await fetch(`/trackdashboard/categories/${id}/questions`);
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const renderQAHTML = (questions) => questions.map((q, i) => `
+        <div class="qa-box">
+            <div class="question">${i + 1}. ${q.user_query}</div>
+            <div class="answer">${q.bot_answer}</div>
+            <div class="time">${q.timestamp}</div>
+        </div>
+    `).join('');
+
+    const contactsHTML = data.contacts.map(c => `
+        <div class="contact-block">
+            <div class="contact-header">📱 ${c.phone}</div>
+            ${renderQAHTML(c.questions)}
+        </div>
+    `).join('');
+
+    const noPhoneHTML = data.no_phone.length > 0 ? `
+        <div class="contact-block no-phone">
+            <div class="contact-header" style="color:#aaa;">
+                بدون رقم موبايل (${data.no_phone.length})
+            </div>
+            ${renderQAHTML(data.no_phone)}
+        </div>
+    ` : '';
+
+    const html = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تقرير ${name}</title>
+    <style>
+        body { font-family:'Segoe UI',Tahoma,sans-serif; padding:30px;
+               color:#2c3e50; background:#f9f7f2; max-width:800px; margin:0 auto; }
+        h1   { color:#1a4332; border-bottom:3px solid #1a4332; padding-bottom:10px; }
+        .meta { color:#7f8c8d; font-size:13px; margin-bottom:25px; }
+        .contact-block { background:white; border-radius:12px; padding:20px;
+                         margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+        .contact-header { font-size:16px; font-weight:700; color:#1a4332;
+                          margin-bottom:15px; padding-bottom:8px;
+                          border-bottom:2px solid #e0dcd0; }
+        .qa-box  { background:#f9f7f2; border-radius:8px; padding:12px;
+                   margin-bottom:10px; border-right:3px solid #1a4332; }
+        .question { font-weight:700; font-size:13px; color:#2c3e50; margin-bottom:8px; }
+        .answer   { font-size:12px; color:#555; line-height:1.7;
+                    border-top:1px solid #e0dcd0; padding-top:8px; }
+        .time     { font-size:11px; color:#aaa; margin-top:6px; }
+        .no-phone { border:1px dashed #ccc; }
+        footer    { text-align:center; margin-top:30px; color:#aaa; font-size:12px; }
+    </style>
+</head>
+<body>
+    <h1>تقرير — ${name}</h1>
+    <div class="meta">
+        عدد العملاء: ${data.contacts.length} — 
+        إجمالي الأسئلة: ${data.contacts.reduce((s,c) => s + c.questions.length, 0) + data.no_phone.length} —
+        تاريخ التصدير: ${new Date().toLocaleDateString('ar-SA')}
+    </div>
+    ${contactsHTML}
+    ${noPhoneHTML}
+    <footer>تقرير صادر من نظام من فريق تحليل البيانات - RAG Dashboard</footer>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `report_${name}_${new Date().toISOString().slice(0,10)}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+// Load categories when tab opens
+function showTab(name) {
+    ['leads', 'note', 'sections', 'users', 'categories', 'peakhours','repeated'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (el) el.style.display = t === name ? 'block' : 'none';
+    });
+    document.querySelectorAll('.nav-tabs-custom .nav-link').forEach(el => 
+        el.classList.remove('active')
+    );
+    event.target.classList.add('active');
+    if (name === 'categories') loadCategories();
+    if (name === 'repeated') loadRepeatedVisitors();
+}
+// ---------------------------------------------------------------------------
+// Peak hours reports
+// ---------------------------------------------------------------------------
+function downloadWeeklyReport() {
+    const week = document.getElementById('weekly-week').value;
+    const year = document.getElementById('weekly-year').value;
+    if (!week || !year) { showToast('اكتب رقم الأسبوع والسنة', false); return; }
+    window.location.href = `/trackdashboard/peak-hours/weekly?week=${week}&year=${year}`;
+}
+
+function downloadMonthlyReport() {
+    const month = document.getElementById('monthly-month').value;
+    const year  = document.getElementById('monthly-year').value;
+    if (!month || !year) { showToast('اختار الشهر والسنة', false); return; }
+    window.location.href = `/trackdashboard/peak-hours/monthly?month=${month}&year=${year}`;
+}
+// ---------------------------------------------------------------------------
+// Export Leads HTML
+// ---------------------------------------------------------------------------
+function exportLeadsHTML() {
+    const week = document.getElementById('export-week').value;
+    const year = document.getElementById('export-year').value;
+    
+    if (!week || !year) { 
+        showToast('برجاء كتابة رقم الأسبوع والسنة بشكل صحيح', false); 
+        return; 
+    }
+    
+    // توجيه المتصفح لرابط التحميل مع تمرير الأسبوع والسنة
+    window.location.href = `/trackdashboard/export-leads-html?week=${week}&year=${year}`;
+}
+// ---------------------------------------------------------------------------
+// Repeated visitors
+// ---------------------------------------------------------------------------
+async function loadRepeatedVisitors() {
+    const res = await fetch('/trackdashboard/repeated-visitors');
+    if (!res.ok) return;
+    const data = await res.json();
+    const container = document.getElementById('repeated-container');
+
+    if (data.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:30px; color:#aaa;">
+                <div style="font-size:30px; margin-bottom:8px;">🎉</div>
+                <p style="font-size:13px;">لا يوجد زوار متكررون بعد</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = data.map(v => `
+        <div style="background:#f9f7f2; border-radius:10px; padding:14px;
+                    margin-bottom:12px; border:1px solid #e0dcd0;">
+            <div style="display:flex; justify-content:space-between; 
+                        align-items:center; margin-bottom:10px;">
+                <div style="font-weight:700; font-size:14px; color:#1a4332;">
+                    📱 ${v.phone}
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    ${v.asked_price_ever ? '<span style="background:#fee2e2;color:#922b21;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;">💰 سأل عن سعر</span>' : ''}
+                    ${v.asked_reg_ever   ? '<span style="background:#fef9c3;color:#854d0e;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;">📝 سأل عن تسجيل</span>' : ''}
+                    <span style="background:#e0f2fe;color:#0369a1;padding:2px 10px;
+                                 border-radius:12px;font-size:11px;font-weight:700;">
+                        ${v.visit_count} زيارات
+                    </span>
+                </div>
+            </div>
+            ${v.visits.map((visit, i) => `
+                <div style="background:white; border-radius:8px; padding:10px;
+                            margin-bottom:8px; border-right:3px solid #1a4332;">
+                    <div style="font-size:12px; font-weight:700; color:#2c3e50; margin-bottom:6px;">
+                        زيارة ${i+1} — ${visit.timestamp}
+                        ${visit.asked_price ? '💰' : ''}
+                        ${visit.asked_reg   ? '📝' : ''}
+                    </div>
+                    ${visit.questions.map((q, j) => `
+                        <div style="font-size:12px; color:#555; padding:4px 0;
+                                    border-bottom:1px solid #f5f5f5;">
+                            <strong>${j+1}.</strong> ${q.q}
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
+async function exportRepeatedHTML(period = 'weekly') {
+    const res = await fetch('/trackdashboard/repeated-visitors');
+    if (!res.ok) return;
+    const allData = await res.json();
+
+    if (allData.length === 0) {
+        showToast('لا يوجد زوار متكررون بعد', false);
+        return;
+    }
+
+    // Filter by period
+    const now   = new Date();
+    const today = now.toISOString().slice(0, 10);
+
+    const filtered = allData.map(v => {
+        let filteredVisits = v.visits.filter(visit => {
+            const visitDate = new Date(visit.timestamp);
+            if (period === 'daily') {
+                const selectedDate = document.getElementById('rep-daily-date')?.value || today;
+                return visit.timestamp.startsWith(selectedDate);
+            
+            } else if (period === 'weekly') {
+                const weekAgo = new Date(now);
+                weekAgo.setDate(now.getDate() - 7);
+                return visitDate >= weekAgo;
+            } else { // monthly
+                return visitDate.getMonth() === now.getMonth() &&
+                       visitDate.getFullYear() === now.getFullYear();
+            }
+        });
+        return filteredVisits.length > 1 ? { ...v, visits: filteredVisits, visit_count: filteredVisits.length } : null;
+    }).filter(v => v !== null);
+
+    const periodLabels = { daily: 'يومي', weekly: 'أسبوعي', monthly: 'شهري' };
+    const periodLabel  = periodLabels[period];
+
+    if (filtered.length === 0) {
+        showToast(`لا يوجد زوار متكررون في التقرير الـ ${periodLabel}`, false);
+        return;
+    }
+
+    const html = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>تقرير الزوار المتكررين — ${periodLabel}</title>
+    <style>
+        body { font-family:'Segoe UI',Tahoma,sans-serif; padding:30px;
+               color:#2c3e50; background:#f9f7f2; max-width:800px; margin:0 auto; }
+        h1   { color:#1a4332; border-bottom:3px solid #1a4332; padding-bottom:10px; }
+        .meta { color:#7f8c8d; font-size:13px; margin-bottom:25px; }
+        .summary { background:#1a4332; color:white; border-radius:12px;
+                   padding:16px; margin-bottom:25px; display:grid;
+                   grid-template-columns:repeat(3,1fr); gap:10px; text-align:center; }
+        .summary .val { font-size:24px; font-weight:700; }
+        .summary .lbl { font-size:11px; opacity:0.8; }
+        .badge { padding:2px 10px; border-radius:12px; font-size:11px; font-weight:700; margin-left:6px; }
+        .hot  { background:#fee2e2; color:#922b21; }
+        .warm { background:#fef9c3; color:#854d0e; }
+        .info { background:#e0f2fe; color:#0369a1; }
+        .visitor { background:white; border-radius:12px; padding:20px;
+                   margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+        .phone   { font-size:16px; font-weight:700; color:#1a4332; margin-bottom:10px; }
+        .visit   { background:#f9f7f2; border-radius:8px; padding:12px;
+                   margin-bottom:8px; border-right:3px solid #1a4332; }
+        .v-title { font-size:12px; font-weight:700; color:#2c3e50; margin-bottom:6px; }
+        .question { font-size:12px; color:#555; padding:3px 0; border-bottom:1px solid #f0ede6; }
+        footer { text-align:center; margin-top:30px; color:#aaa; font-size:12px; }
+    </style>
+</head>
+<body>
+    <h1>🔄 تقرير الزوار المتكررين — ${periodLabel}</h1>
+    <div class="meta">
+        عدد العملاء: ${filtered.length} — 
+        تاريخ التصدير: ${now.toLocaleDateString('ar-SA')}
+    </div>
+    <div class="summary">
+        <div><div class="val">${filtered.length}</div><div class="lbl">زوار متكررون</div></div>
+        <div><div class="val">${filtered.filter(v => v.asked_price_ever).length}</div><div class="lbl">سألوا عن سعر</div></div>
+        <div><div class="val">${filtered.filter(v => v.asked_reg_ever).length}</div><div class="lbl">سألوا عن تسجيل</div></div>
+    </div>
+    ${filtered.map(v => `
+        <div class="visitor">
+            <div class="phone">📱 ${v.phone}</div>
+            <div style="margin-bottom:12px;">
+                <span class="badge info">${v.visit_count} زيارات</span>
+                ${v.asked_price_ever ? "<span class='badge hot'>💰 سأل عن سعر</span>" : ''}
+                ${v.asked_reg_ever   ? "<span class='badge warm'>📝 سأل عن تسجيل</span>" : ''}
+            </div>
+            ${v.visits.map((visit, i) => `
+                <div class="visit">
+                    <div class="v-title">زيارة ${i+1} — ${visit.timestamp} ${visit.asked_price ? '💰' : ''} ${visit.asked_reg ? '📝' : ''}</div>
+                    ${visit.questions.map((q, j) => `<div class="question"><strong>${j+1}.</strong> ${q.q}</div>`).join('')}
+                </div>
+            `).join('')}
+        </div>
+    `).join('')}
+    <footer>تقرير صادر من فريق تحليل البيانات نظام RAG Dashboard</footer>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `repeated_${period}_${today}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

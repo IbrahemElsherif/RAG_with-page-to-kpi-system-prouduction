@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% if report_type == 'monthly' %}
+            تقرير أوقات الذروة — {{ month_name }} {{ year }}
+        {% else %}
+            تقرير أوقات الذروة — أسبوع {{ week_num }}
+        {% endif %}
+    </title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f9f7f2; color: #2c3e50;
+            padding: 30px; max-width: 1000px; margin: 0 auto;
+        }
+
+        h1 {
+            color: #1a4332; border-bottom: 3px solid #1a4332;
+            padding-bottom: 12px; margin-bottom: 8px; font-size: 22px;
+        }
+
+        .meta {
+            color: #7f8c8d; font-size: 13px; margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block; padding: 3px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; margin-right: 8px;
+        }
+        .badge-weekly  { background: #dcfce7; color: #166534; }
+        .badge-monthly { background: #dbeafe; color: #1e40af; }
+
+        /* Summary cards */
+        .summary-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 15px; margin-bottom: 30px;
+        }
+        .summary-card {
+            background: white; border-radius: 12px; padding: 18px;
+            text-align: center; border: 1px solid #e0dcd0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .summary-card .value {
+            font-size: 26px; font-weight: 700;
+            color: #1a4332; margin-bottom: 6px; line-height: 1.2;
+        }
+        .summary-card .label {
+            font-size: 11px; color: #7f8c8d; text-transform: uppercase;
+        }
+
+        /* Insights */
+        .insights {
+            background: #1a4332; color: white;
+            border-radius: 15px; padding: 22px; margin-bottom: 25px;
+        }
+        .insights h3 {
+            font-size: 15px; margin-bottom: 14px;
+            opacity: 0.85; letter-spacing: 0.3px;
+        }
+        .insight-item {
+            background: rgba(255,255,255,0.1); border-radius: 10px;
+            padding: 11px 16px; margin-bottom: 8px; font-size: 13px;
+            display: flex; align-items: center; gap: 10px; line-height: 1.5;
+        }
+        .insight-item:last-child { margin-bottom: 0; }
+
+        /* Charts */
+        .chart-section {
+            background: white; border-radius: 15px; padding: 22px;
+            margin-bottom: 22px; border: 1px solid #e0dcd0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .chart-title {
+            font-size: 15px; font-weight: 700; color: #1a4332;
+            margin-bottom: 18px; padding-bottom: 10px;
+            border-bottom: 1px solid #e0dcd0;
+        }
+        .chart-wrapper { position: relative; height: 260px; }
+
+        footer {
+            text-align: center; margin-top: 35px;
+            color: #aaa; font-size: 12px; padding-top: 20px;
+            border-top: 1px solid #e0dcd0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<h1>
+    📅
+    {% if report_type == 'monthly' %}
+        تقرير أوقات الذروة — {{ month_name }} {{ year }}
+    {% else %}
+        تقرير أوقات الذروة — أسبوع {{ week_num }} / {{ year }}
+    {% endif %}
+</h1>
+<div class="meta">
+    <span class="badge {% if report_type == 'monthly' %}badge-monthly{% else %}badge-weekly{% endif %}">
+        {% if report_type == 'monthly' %}شهري{% else %}أسبوعي{% endif %}
+    </span>
+    تاريخ التوليد: {{ generated_at }}
+</div>
+
+<!-- Summary cards -->
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="value">{{ total_sessions }}</div>
+        <div class="label">إجمالي الجلسات</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">{{ total_questions }}</div>
+        <div class="label">إجمالي الأسئلة</div>
+    </div>
+    <div class="summary-card">
+        <div class="value" style="font-size:18px;">{{ peak_day }}</div>
+        <div class="label">أكثر يوم نشاطاً</div>
+    </div>
+    <div class="summary-card">
+        <div class="value" style="font-size:15px;">{{ peak_hour }}</div>
+        <div class="label">أكثر وقت نشاطاً</div>
+    </div>
+</div>
+
+<!-- Insights -->
+<div class="insights">
+    <h3>💡 أبرز الاستنتاجات</h3>
+    <div class="insight-item">
+        📌 أعلى يوم نشاط: <strong>{{ peak_day }}</strong>
+        — ينصح بتكثيف المتابعة في هذا اليوم
+    </div>
+    <div class="insight-item">
+        🕐 أعلى وقت نشاط: <strong>{{ peak_hour }}</strong>
+        — ينصح بتخصيص فريق مبيعات في هذا الوقت
+    </div>
+    <div class="insight-item">
+        📊 متوسط الأسئلة لكل جلسة:
+        <strong>
+            {% if total_sessions > 0 %}
+                {{ (total_questions / total_sessions) | round(1) }}
+            {% else %}
+                0
+            {% endif %}
+        </strong>
+        سؤال
+    </div>
+    {% if total_questions == 0 %}
+    <div class="insight-item">
+        ⚠️ لا توجد بيانات كافية لهذه الفترة بعد
+    </div>
+    {% endif %}
+</div>
+
+<!-- Chart 1: Days of week -->
+<div class="chart-section">
+    <div class="chart-title">📆 نشاط أيام الأسبوع</div>
+    <div class="chart-wrapper">
+        <canvas id="daysChart"></canvas>
+    </div>
+</div>
+
+<!-- Chart 2: Hours of day -->
+<div class="chart-section">
+    <div class="chart-title">🕐 توزيع النشاط على ساعات اليوم</div>
+    <div class="chart-wrapper">
+        <canvas id="hoursChart"></canvas>
+    </div>
+</div>
+
+<!-- Chart 3: Extra (only for monthly) -->
+{% if extra_title %}
+<div class="chart-section">
+    <div class="chart-title">{{ extra_title }}</div>
+    <div class="chart-wrapper">
+        <canvas id="extraChart"></canvas>
+    </div>
+</div>
+{% endif %}
+
+<footer>
+    تقرير صادر من فريق تحليل البيانات — نظام RAG Dashboard —
+    المعهد السعودي المتخصص العالي للتدريب
+</footer>
+
+<script>
+const GREEN = '#1a4332';
+const MUTED = '#c8ddd5';
+
+const daysData  = {{ days_data | safe }};
+const hoursData = {{ hours_data | safe }};
+// Chart 1 — Days of week
+new Chart(document.getElementById('daysChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ days_labels | safe }},
+        datasets: [{
+            label: 'عدد الأسئلة',
+            data: daysData,
+            backgroundColor: daysData.map(
+                v => v === Math.max(...daysData) ? GREEN : MUTED
+            ),
+            borderRadius: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f0ede6' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Chart 2 — Hours of day
+new Chart(document.getElementById('hoursChart'), {
+    type: 'line',
+    data: {
+        labels: {{ hours_labels | safe }},
+        datasets: [{
+            label: 'عدد الأسئلة',
+            data: hoursData,
+            borderColor: GREEN,
+            backgroundColor: 'rgba(26,67,50,0.08)',
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointBackgroundColor: GREEN,
+            fill: true,
+            tension: 0.4,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f0ede6' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Chart 3 — Extra (monthly only)
+{% if extra_title %}
+const extraData = {{ extra_data | safe }};
+new Chart(document.getElementById('extraChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ extra_labels | safe }},
+        datasets: [{
+            label: 'عدد الأسئلة',
+            data: extraData,
+            backgroundColor: extraData.map(
+                (v, i, arr) => i === arr.length - 1 ? GREEN : MUTED
+            ),
+            borderRadius: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f0ede6' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+{% endif %}
+</script>
+
+</body>
+</html>
