@@ -1357,6 +1357,29 @@ async def seed_default_sections():
 # ---------------------------------------------------------------------------
 # Report requests — sales submits, admin sees in trackdashboard
 # ---------------------------------------------------------------------------
+@app.on_event("startup")
+async def run_migrations():
+    from sqlalchemy import text
+    columns = [
+        ("chat_logs",  "is_unanswered", "BOOLEAN DEFAULT 0"),
+        ("chat_logs",  "category",  "VARCHAR"),
+        ("chat_logs",  "topic",     "VARCHAR"),
+        ("leads",      "is_approved", "BOOLEAN DEFAULT 0"),
+        ("leads",      "approved_at", "DATETIME"),
+        ("leads",      "admin_note",  "TEXT"),
+        ("uploaded_reports", "request_id",    "INTEGER"),
+        ("uploaded_reports", "report_period", "VARCHAR"),
+        ("uploaded_reports", "period_label",  "VARCHAR"),
+        ("weekly_notes",     "published_at",  "DATETIME"),
+    ]
+    with engine.connect() as conn:
+        for table, col, col_type in columns:
+            try:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}"))
+                conn.commit()
+                print(f"--- [MIGRATE] ✓ {table}.{col} added ---")
+            except Exception as e:
+                print(f"--- [MIGRATE] • {table}.{col}: already exists ---")
 
 @app.post("/dashboard/request-report")
 async def request_report(
@@ -2186,5 +2209,6 @@ async def get_repeated_report(
             for r in reports
         ]
     }
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -43,4 +43,4 @@ EXPOSE 80
 
 # Command to run the app
 # Note: Since the virtualenv is in PATH, we call uvicorn directly
-CMD ["uvicorn", "src.rag_app.main:app", "--host", "0.0.0.0", "--port", "80", "--proxy-headers"]
+CMD ["sh", "-c", "python src/rag_app/create_admin.py && uvicorn src.rag_app.main:app --host 0.0.0.0 --port 80 --proxy-headers"]
