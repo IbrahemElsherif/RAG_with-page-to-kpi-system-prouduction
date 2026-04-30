@@ -264,24 +264,28 @@ async def detect_intent_background(session_id: str, message: str):
 
         # 3. توجيه النموذج لتحليل القائمة
         intent_prompt = f"""
-You are an expert sales intent analyzer. 
+You are a strict sales intent classifier for a Saudi training institute.
 Below are ALL the messages sent by a single user in a chat session.
 
 User Messages:
 {user_questions_text}
 
-Task: Evaluate the user's underlying intent based on the entire context. Ignore spelling mistakes and slang. Focus on the core meaning.
+RULES:
+- Be conservative. Only mark True if the evidence is CLEAR and EXPLICIT.
+- When in doubt → false.
+- Ignore greetings, general questions about courses/content, and location questions.
 
 [CONCEPT 1]: PRICE INTENT
-True if the user wants to know the financial cost of anything.
-Examples of True: "بكم"، "تكلفة"، "عندكم خصم"، "اسعاركم غالية"، "كم ادفع"
+True ONLY if the user explicitly asks about cost, price, fees, payment, or discounts.
+True examples: "بكم"، "كم التكلفة"، "عندكم خصم"، "كم ادفع"، "الرسوم كم"، "how much"، "price"
+False examples: "وين الفرع"، "ما هي الدورات"، "متى يبدأ"، "كم مدة الدورة"، "ما تخصصاتكم"
 
 [CONCEPT 2]: REGISTRATION INTENT
-True if the user shows ANY interest in joining, applying, or understanding the onboarding process.
-Examples of True: "كيف اسجل"، "وش الشروط"، "متى يبدأ التقديم"، "ابي انضم"، "الرابط وين"، "كيف القبول"
+True ONLY if the user explicitly asks about registering, applying, joining, or enrollment steps.
+True examples: "كيف اسجل"، "وش الشروط"، "ابي انضم"، "رابط التسجيل"، "كيف القبول"، "how to apply"
+False examples: "عندكم دبلوم"، "ما هي الدورات"، "كم مدة الدورة"
 
-Based on the concepts above, analyze the User Messages.
-Respond ONLY with a valid JSON object in this exact format:
+Respond ONLY with valid JSON, no explanation:
 {{
     "price_intent": true or false,
     "registration_intent": true or false
@@ -475,6 +479,15 @@ def get_trackdashboard_user(request: Request):
 # ---------------------------------------------------------------------------
 # Lead scoring helper
 # ---------------------------------------------------------------------------
+_MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
+_WEEK_ORDINALS_AR = ["الأول","الثاني","الثالث","الرابع","الخامس"]
+
+def _week_label(year: int, week_num: int) -> str:
+    from datetime import datetime
+    start = datetime.fromisocalendar(year, week_num, 1)
+    week_of_month = (start.day - 1) // 7
+    return f"الأسبوع {_WEEK_ORDINALS_AR[week_of_month]} من {_MONTHS_AR[start.month - 1]}"
+
 def _compute_lead_status(question_count: int, asked_price: bool, asked_reg: bool) -> str:
     if asked_price or asked_reg:
         return "hot"
@@ -576,7 +589,7 @@ Output only the improved search query with no preamble:
     You MUST reply in that exact language — if English, reply in English only.
     If Arabic, reply in Arabic only. Never mix languages.
     2. If asked about a city not in the list, apologize and mention available branches.
-    3. For pricing or registration questions, share: unified number 920012673 and WhatsApp 0573692237.
+    3. For pricing or registration questions, share: unified number 920012673 and WhatsApp 0562510671.
     4. Be direct and concise.
 
     User: {message}
@@ -1208,7 +1221,8 @@ async def sales_dashboard(request: Request, db: Session = Depends(get_db)):
             "sections":            sections,
             "top_questions":       top_questions,
             "week_num":            week_num,
-            "year_num":            year, 
+            "year_num":            year,
+            "week_label":          _week_label(year, week_num),
             "week_session_count":  week_session_count,
             "has_questions_report": questions_report is not None,
             "week_hot":  week_hot,
@@ -1676,6 +1690,7 @@ async def get_week_data(
     return {
         "week_num":      week_num,
         "year":          year,
+        "week_label":    _week_label(year, week_num),
         "total_leads":   len(week_leads),
         "hot_leads":     sum(1 for l in week_leads if l.lead_status == "hot"),
         "warm_leads":    sum(1 for l in week_leads if l.lead_status == "warm"),
@@ -1738,6 +1753,7 @@ async def export_leads_html(
         "generated_at": datetime.now(),
         "week_num":     week,
         "year":         year,
+        "week_label":   _week_label(year, week),
     }
 
     # Render template and return as downloadable file

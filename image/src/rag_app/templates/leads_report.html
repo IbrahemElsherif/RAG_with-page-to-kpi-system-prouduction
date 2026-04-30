@@ -2,11 +2,17 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>تقرير الـ Leads — أسبوع {{ week_num }}</title>
+    <title>تقرير الـ Leads — {{ week_label }}</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 30px; color: #2c3e50; background: #f9f7f2; }
         h1 { color: #1a4332; border-bottom: 3px solid #1a4332; padding-bottom: 10px; }
         .meta { color: #7f8c8d; font-size: 13px; margin-bottom: 25px; }
+        .filters { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 12px; font-weight: bold; color: #1a4332; }
+        .filter-group input, .filter-group select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; }
+        .filter-btn { padding: 8px 16px; background: #1a4332; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .filter-btn:hover { background: #0f2818; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         th { background: #1a4332; color: white; padding: 12px 15px; text-align: right; font-size: 13px; }
         td { padding: 11px 15px; border-bottom: 1px solid #f0ede6; font-size: 13px; }
@@ -18,23 +24,56 @@
         .cold { background: #f1f5f9; color: #475569; }
         .check { color: #1a4332; font-weight: bold; }
         .cross { color: #aaa; }
+        .badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-danger  { background: #fee2e2; color: #922b21; }
+        .badge-light   { background: #f1f5f9; color: #475569; }
         footer { text-align: center; margin-top: 30px; color: #aaa; font-size: 12px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<h1>تقرير الـ Leads الصادر من فريق تحليل البيانات — الأسبوع {{ week_num }}</h1>
+<h1>تقرير الـ Leads الصادر من فريق تحليل البيانات — {{ week_label }}</h1>
 <div class="meta">
     تاريخ الإصدار: {{ generated_at.strftime('%Y-%m-%d %H:%M') }} —
     إجمالي الـ leads: <strong>{{ leads | length }}</strong>
 </div>
 
 {% if leads %}
+<div class="filters">
+    <div class="filter-group">
+        <label>المدينة</label>
+        <select id="cityFilter">
+            <option value="">الكل</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>مسجل لدينا </label>
+        <select id="registeredFilter">
+            <option value="">الكل</option>
+            <option value="yes">نعم</option>
+            <option value="no">لا</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>من التاريخ</label>
+        <input type="date" id="dateFromFilter">
+    </div>
+    <div class="filter-group">
+        <label>إلى التاريخ</label>
+        <input type="date" id="dateToFilter">
+    </div>
+    <button class="filter-btn" onclick="clearFilters()">مسح الفلاتر</button>
+</div>
+
 <table>
     <thead>
         <tr>
             <th>ID</th>
             <th>رقم الموبايل</th>
+            <th>المدينة</th>
+            <th>مسجل لدينا؟</th>
             <th>عدد الأسئلة</th>
             <th>سعر؟</th>
             <th>تسجيل؟</th>
@@ -48,6 +87,8 @@
         <tr>
             <td style="color:#aaa; font-family:monospace;">#{{ lead.id }}</td>
             <td><strong>{{ lead.phone_number }}</strong></td>
+            <td>{{ lead.city or '—' }}</td>
+            <td>{% if lead.is_registered == 'yes' %}<span class="badge badge-success">مسجل</span>{% elif lead.is_registered == 'no' %}<span class="badge badge-danger">غير مسجل</span>{% else %}<span class="badge badge-light">غير محدد</span>{% endif %}</td>
             <td>{{ lead.question_count }}</td>
             <td>{% if lead.asked_about_price %}<span class="check">✓</span>{% else %}<span class="cross">—</span>{% endif %}</td>
             <td>{% if lead.asked_about_registration %}<span class="check">✓</span>{% else %}<span class="cross">—</span>{% endif %}</td>
@@ -69,6 +110,106 @@
 <footer>
     تقرير صادر من فريق تحليل البيانات — RAG Dashboard — {{ generated_at.strftime('%Y') }}
 </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('table');
+    if (!table) return;
+
+    // Extract unique cities
+    const rows = Array.from(document.querySelectorAll('tbody tr'));
+    const cities = new Set();
+    rows.forEach(row => {
+        const dateCell = row.cells[7];
+        if (dateCell) {
+            const leadId = row.cells[0].textContent.trim();
+            const lead = findLeadData(leadId);
+            if (lead && lead.city) cities.add(lead.city);
+        }
+    });
+
+    // Populate city dropdown
+    const citySelect = document.getElementById('cityFilter');
+    Array.from(cities).sort().forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+    });
+
+    // Setup event listeners for filtering
+    ['cityFilter', 'registeredFilter', 'dateFromFilter', 'dateToFilter'].forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) elem.addEventListener('change', applyFilters);
+    });
+
+    applyFilters();
+});
+
+function findLeadData(leadId) {
+    const leadsData = [
+        {% for lead in leads %}
+        {id: {{ lead.id }}, city: {{ lead.city | tojson }}, is_registered: {{ lead.is_registered | tojson }}},
+        {% endfor %}
+    ];
+    return leadsData.find(l => '#' + l.id === leadId);
+}
+
+function applyFilters() {
+    const cityVal = document.getElementById('cityFilter').value;
+    const regVal = document.getElementById('registeredFilter').value;
+    const dateFrom = document.getElementById('dateFromFilter').value;
+    const dateTo = document.getElementById('dateToFilter').value;
+
+    const rows = document.querySelectorAll('tbody tr');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const dateStr = row.cells[9].textContent.trim();
+        const leadId = row.cells[0].textContent.trim();
+        const lead = findLeadData(leadId);
+
+        if (!lead) return;
+
+        let show = true;
+
+        if (cityVal && lead.city !== cityVal) show = false;
+        if (regVal) {
+            const isReg = regVal === 'yes' ? lead.is_registered === 'yes' : lead.is_registered === 'no';
+            if (!isReg) show = false;
+        }
+
+        if (dateFrom) {
+            const rowDate = dateStr.split(' ')[0];
+            if (rowDate < dateFrom) show = false;
+        }
+        if (dateTo) {
+            const rowDate = dateStr.split(' ')[0];
+            if (rowDate > dateTo) show = false;
+        }
+
+        row.classList.toggle('hidden', !show);
+        if (show) visibleCount++;
+    });
+
+    updateCount(visibleCount);
+}
+
+function clearFilters() {
+    document.getElementById('cityFilter').value = '';
+    document.getElementById('registeredFilter').value = '';
+    document.getElementById('dateFromFilter').value = '';
+    document.getElementById('dateToFilter').value = '';
+    applyFilters();
+}
+
+function updateCount(count) {
+    const total = document.querySelectorAll('tbody tr').length;
+    const metaDiv = document.querySelector('.meta');
+    const countSpan = metaDiv.querySelector('strong');
+    countSpan.textContent = count + ' / ' + total;
+}
+</script>
 
 </body>
 </html>

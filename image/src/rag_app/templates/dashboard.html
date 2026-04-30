@@ -406,7 +406,7 @@
         <div>
             <h2 style="margin:0; color:var(--main-green)">RAG dashboard data analysis</h2>
             <small style="color:var(--text-muted)">
-                الأسبوع <span id="header-week-num">{{ week_num }}</span> — مرحباً، {{ username }}
+                <span id="header-week-num">{{ week_label }}</span> — مرحباً، {{ username }}
             </small>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
@@ -417,7 +417,7 @@
 
     <div class="week-tabs">
         <button class="tab" onclick="prevWeek()">◀ الأسبوع السابق</button>
-        <button class="tab active" id="weekLabel">الأسبوع {{ week_num }}</button>
+        <button class="tab active" id="weekLabel">{{ week_label }}</button>
         <button class="tab" onclick="nextWeek()">الأسبوع التالي ▶</button>
     </div>
 
@@ -676,7 +676,7 @@
     <div id="categories-container"></div>
     
     <footer id="footer-week-info" style="text-align:center; margin-top:30px; color:var(--text-muted); font-size:11px;">
-        جميع البيانات تُحدث أسبوعياً — الأسبوع <span id="footer-week-num">{{ week_num }}</span> — 2026
+        جميع البيانات تُحدث أسبوعياً — <span id="footer-week-num">{{ week_label }}</span> — 2026
     </footer>
     
 </div>
@@ -797,8 +797,8 @@ async function loadWeek(week, year) {
     currentYear = year;
     const footerWeekSpan = document.getElementById('footer-week-num');
     const headerWeekSpan = document.getElementById('header-week-num');
-    if (footerWeekSpan) footerWeekSpan.textContent = week;
-    if (headerWeekSpan) headerWeekSpan.textContent = week;
+    if (footerWeekSpan) footerWeekSpan.textContent = data.week_label;
+    if (headerWeekSpan) headerWeekSpan.textContent = data.week_label;
 
     document.getElementById('stat-leads').textContent = data.total_leads;
     document.getElementById('stat-hot').textContent   = data.hot_leads;
@@ -816,7 +816,7 @@ async function loadWeek(week, year) {
         }
     }
 
-    document.getElementById('weekLabel').textContent = `الأسبوع ${week} — ${year}`;
+    document.getElementById('weekLabel').textContent = data.week_label;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 
     const faqContainer = document.getElementById('faq-container');
