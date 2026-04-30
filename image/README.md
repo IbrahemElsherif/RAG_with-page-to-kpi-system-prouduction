@@ -51,11 +51,21 @@ aws efs create-mount-target \
     --subnet-id <subnet-id> \
     --security-groups <security-group-id>
 ```
+
+ ## 4. to AWS CloudWatch Logs Evluated
+fields @timestamp, @message
+| filter @message like /RAG_EVAL/
+| parse @message "Question: * " as question
+| parse @message "Context: * " as context
+| parse @message "Answer: * " as answer
+| sort @timestamp desc
+
 W62ZTthTZ6A6prn
 https://d14hbi7dyty7wy.cloudfront.net/chat
 python -c "import sqlite3; conn = sqlite3.connect('kpi_data.db'); conn.execute('ALTER TABLE uploaded_reports ADD COLUMN report_period VARCHAR'); conn.execute('ALTER TABLE uploaded_reports ADD COLUMN period_label VARCHAR'); conn.commit(); conn.close(); print('Done!')"
 sqlite3 kpi_data.db "DELETE FROM uploaded_reports WHERE id IN (4);
 sqlite3 kpi_data.db "DELETE FROM weekly_notes;"
+
 Sales: https://d14hbi7dyty7wy.cloudfront.net/dashboard
 Admin (Track): https://d14hbi7dyty7wy.cloudfront.net/trackdashboard
 Login: https://d14hbi7dyty7wy.cloudfront.net/dashboard/login

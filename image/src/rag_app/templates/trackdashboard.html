@@ -205,13 +205,13 @@
                     <table class="table leads-table mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="px-3">الحالة</th>
                                 <th>Session ID</th>
                                 <th>رقم الموبايل</th>
                                 <th>أسئلة</th>
                                 <th>سعر؟</th>
                                 <th>تسجيل؟</th>
-                                <th>Lead Status</th>
+                                <th>المدينه</th>
+                                <th>مسجل لدينا؟</th>
                                 <th>التاريخ</th>
                                 <th>ملاحظة</th>
                                 <th>إجراء</th>
@@ -246,12 +246,17 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if lead.lead_status == 'hot' %}
-                                        <span class="badge-hot">🔥 Hot</span>
-                                    {% elif lead.lead_status == 'warm' %}
-                                        <span class="badge-warm">⚡ Warm</span>
+                                    <span class="badge bg-secondary" style="font-size: 11px;">
+                                            {{ lead.city if lead.city else 'غير محدد' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if lead.is_registered == 'yes' %}
+                                        <span class="badge bg-success" style="font-size: 11px;">مسجل</span>
+                                    {% elif lead.is_registered == 'no' %}
+                                        <span class="badge bg-danger" style="font-size: 11px;">غير مسجل</span>
                                     {% else %}
-                                        <span class="badge-cold">Cold</span>
+                                        <span class="badge bg-light text-dark" style="font-size: 11px;">غير محدد</span>
                                     {% endif %}
                                 </td>
                                 <td><small class="text-muted">{{ lead.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></td>

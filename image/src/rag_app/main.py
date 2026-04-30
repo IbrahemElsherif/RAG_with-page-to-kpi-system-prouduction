@@ -234,52 +234,146 @@ vector_store = None
 #---------------------------------------------------------------------------
 #
 #---------------------------------------------------------------------------
+import json
+
 async def detect_intent_background(session_id: str, message: str):
     db = SessionLocal()
     try:
-        intent_prompt = f"""
-You are an intent classifier for a Saudi training institute chatbot.
-Analyze the following user message and answer two questions:
-
-User message: "{message}"
-
-Q1: Is the user genuinely asking about PRICE, COST, or FEES of a course or program?
-Q2: Is the user genuinely asking about REGISTRATION, ENROLLMENT, or ADMISSION to a course?
-
-Rules:
-- Greetings like "السلام عليكم" or "hello" = NO to both
-- Generic questions not about price/registration = NO
-- Only answer YES if the intent is clearly and specifically about price or registration
-
-Reply in this exact format (nothing else):
-PRICE: YES or NO
-REG: YES or NO
-"""
-        intent_response = await llm.ainvoke(intent_prompt)
-        intent_text = intent_response.content.strip().upper()
-        touched_price = "PRICE: YES" in intent_text
-        touched_reg   = "REG: YES"   in intent_text
-        print(f"--- [INTENT] price={touched_price} reg={touched_reg} for: '{message[:40]}' ---")
-
+        # 1. التحقق المبكر لتوفير التكلفة
         lead = db.query(models.Lead).filter(models.Lead.session_id == session_id).first()
-        if lead:
-            if touched_price:
-                lead.asked_about_price = True
-            if touched_reg:
-                lead.asked_about_registration = True
+        if not lead:
+            return  
+            
+        # إذا سأل عن الاثنين مسبقاً، لا داعي للاتصال بـ GPT نهائياً
+        if lead.asked_about_price and lead.asked_about_registration:
+            return
+
+        # 2. جلب **جميع أسئلة العميل فقط** في هذه الجلسة (بدون ردود البوت)
+        all_user_logs = (
+            db.query(models.ChatLog.user_query)
+            .filter(models.ChatLog.session_id == session_id)
+            .order_by(models.ChatLog.timestamp.asc())
+            .all()
+        )
+        
+        if not all_user_logs:
+            return
+
+        # تجميع أسئلة العميل في نص واحد
+        user_questions_text = "\n".join([f"- {log[0]}" for log in all_user_logs if log[0]])
+
+        # 3. توجيه النموذج لتحليل القائمة
+        intent_prompt = f"""
+You are an expert sales intent analyzer. 
+Below are ALL the messages sent by a single user in a chat session.
+
+User Messages:
+{user_questions_text}
+
+Task: Evaluate the user's underlying intent based on the entire context. Ignore spelling mistakes and slang. Focus on the core meaning.
+
+[CONCEPT 1]: PRICE INTENT
+True if the user wants to know the financial cost of anything.
+Examples of True: "بكم"، "تكلفة"، "عندكم خصم"، "اسعاركم غالية"، "كم ادفع"
+
+[CONCEPT 2]: REGISTRATION INTENT
+True if the user shows ANY interest in joining, applying, or understanding the onboarding process.
+Examples of True: "كيف اسجل"، "وش الشروط"، "متى يبدأ التقديم"، "ابي انضم"، "الرابط وين"، "كيف القبول"
+
+Based on the concepts above, analyze the User Messages.
+Respond ONLY with a valid JSON object in this exact format:
+{{
+    "price_intent": true or false,
+    "registration_intent": true or false
+}}
+"""
+        # 4. إرسال الطلب للنموذج
+        intent_response = await llm.ainvoke(intent_prompt)
+        response_text = intent_response.content.strip()
+        
+        # تنظيف الرد
+        if response_text.startswith("```json"):
+            response_text = response_text[7:-3].strip()
+        elif response_text.startswith("```"):
+            response_text = response_text[3:-3].strip()
+            
+        # 5. استخراج البيانات (Parsing)
+        parsed_intent = json.loads(response_text)
+        touched_price = parsed_intent.get("price_intent", False)
+        touched_reg = parsed_intent.get("registration_intent", False)
+        
+
+        # 6. تحديث قاعدة البيانات إذا وجدنا نية جديدة
+        updated = False
+        if touched_price and not lead.asked_about_price:
+            lead.asked_about_price = True
+            updated = True
+        if touched_reg and not lead.asked_about_registration:
+            lead.asked_about_registration = True
+            updated = True
+            
+        if updated:
             lead.lead_status = _compute_lead_status(
                 lead.question_count, lead.asked_about_price, lead.asked_about_registration
             )
             db.commit()
-        print(f"--- [INTENT] price={touched_price} reg={touched_reg} for: '{message[:40]}' ---")
-            
 
+    except json.JSONDecodeError as e:
+        print(f"--- [ERROR] Intent parsing failed (Invalid JSON): {e} ---")
     except Exception as e:
         print(f"--- [ERROR] Intent detection failed: {e} ---")
-        
     finally:
         db.close()
+async def generate_session_summary_background(session_id: str):
+    db = SessionLocal()
+    try:
+        # التأكد من وجود العميل أولاً
+        lead = db.query(models.Lead).filter(models.Lead.session_id == session_id).first()
+        if not lead:
+            return  
+            
+        # جلب جميع أسئلة العميل في الجلسة
+        all_user_logs = (
+            db.query(models.ChatLog.user_query)
+            .filter(models.ChatLog.session_id == session_id)
+            .order_by(models.ChatLog.timestamp.asc())
+            .all()
+        )
+        
+        if not all_user_logs:
+            return
 
+        # تجميع الأسئلة في نص واحد
+        user_questions_text = "\n".join([f"- {log[0]}" for log in all_user_logs if log[0]])
+
+        # توجيه النموذج لعمل ملخص فقط وبدون JSON
+        summary_prompt = f"""
+You are an expert sales analyst for a Saudi Institute. 
+Analyze the following user questions from a single session and write a brief summary.
+
+User Questions:
+{user_questions_text}
+
+Task: Create a very short Arabic summary of what the user is looking for (maximum 10 words).
+Example: "اهتمام بدبلوم القانون وفروع الرياض"
+Example: "استفسار عن دبلوم البرمجة وطريقة التسجيل"
+
+Respond ONLY with the Arabic summary text, nothing else. No formatting, no markdown.
+"""
+        # إرسال الطلب
+        summary_response = await llm.ainvoke(summary_prompt)
+        summary_text = summary_response.content.strip()
+
+        # تحديث قاعدة البيانات
+        lead.session_summary = summary_text
+        db.commit()
+        
+        print(f"--- [DEBUG] SESSION SUMMARY UPDATED: {summary_text} ---")
+
+    except Exception as e:
+        print(f"--- [ERROR] Summary generation failed: {e} ---")
+    finally:
+        db.close()
 # ---------------------------------------------------------------------------
 # Vector store helpers
 # ---------------------------------------------------------------------------
@@ -403,7 +497,8 @@ class LeadSubmitRequest(BaseModel):
     phone_number: str
     question_count: int = 0
     asked_about_price: bool = False
-    asked_about_registration: bool = False
+    is_registered: Optional[str] = None
+    city: Optional[str] = None
 
 
 class LeadUpdateRequest(BaseModel):
@@ -460,6 +555,7 @@ Output only the improved search query with no preamble:
     good_docs = [doc.page_content for doc, score in results if score < SIMILARITY_THRESHOLD]
     knowledge = "\n\n".join(good_docs)
     print(f"--- [DEBUG] Found {len(good_docs)} relevant documents ---")
+    
 
     rag_prompt = f"""
     You are a smart assistant for the Saudi Specialized Higher Institute for Training.
@@ -487,6 +583,7 @@ Output only the improved search query with no preamble:
     Assistant:
     """
 
+
     return rag_prompt, search_query, good_docs, limited_history
 
 
@@ -496,7 +593,6 @@ async def generate_response_stream(
     start_time = time.time()
 
     rag_prompt, search_query, docs, _ = prepare_rag_context(message, history)
-
 
     full_answer = ""
     first_token_time = None
@@ -519,42 +615,38 @@ async def generate_response_stream(
             response_time_to_log = (
                 first_token_time if first_token_time is not None else (time.time() - start_time)
             )
+
             # Detect unanswered questions from bot response
             unanswered_phrases = [
                 "عذراً", "عذرا", "لا أملك", "لا يوجد لدي",
-                "لا تتوفر", "لا أعرف", "غير متاح" , "للحصول على معلومات","لا يوجد", "للاستفسار عن سعر "
+                "لا تتوفر", "لا أعرف", "غير متاح", "لا يوجد",
                 "sorry", "i don't have", "i do not have"
             ]
             is_unanswered = any(
                 phrase in full_answer.lower()
                 for phrase in unanswered_phrases
             )
-            price_reg_keywords = [
-                "سعر", "تكلفة", "رسوم", "price", "cost", "fee",
-                "تسجيل", "اسجل", "قبول", "register", "enroll"
-            ]
-            if any(k in message.lower() for k in price_reg_keywords):
-                is_unanswered = False
+
         except Exception as e:
             yield f"Error: {str(e)}"
             response_time_to_log = time.time() - start_time
 
-    # Update question count immediately (no delay for user)
+    # Update question count only — no intent analysis here
     try:
-        lead = db.query(models.Lead).filter(models.Lead.session_id == session_id).first()
+        lead = db.query(models.Lead).filter(
+            models.Lead.session_id == session_id
+        ).first()
         if lead:
             lead.question_count += 1
             lead.lead_status = _compute_lead_status(
-                lead.question_count, lead.asked_about_price, lead.asked_about_registration
+                lead.question_count,
+                lead.asked_about_price,
+                lead.asked_about_registration
             )
             db.commit()
     except Exception as e:
         print(f"--- [ERROR] Lead update failed: {e} ---")
-        
 
-    # Detect price/reg intent in background (no impact on response time)
-    asyncio.create_task(detect_intent_background(session_id, message))
-    
     # Save chat log
     try:
         new_log = models.ChatLog(
@@ -568,8 +660,15 @@ async def generate_response_stream(
         db.add(new_log)
         db.commit()
         db.refresh(new_log)
+        print(f"RAG_EVAL_START", flush=True)
+        print(f"RAG_EVAL | Question: {message}", flush=True)
+        print(f"RAG_EVAL | Context: {docs}", flush=True)
+        print(f"RAG_EVAL | Answer: {full_answer}", flush=True)
+        print(f"RAG_EVAL_END", flush=True)
         print(f"--- [LOG] Response Time Saved: {response_time_to_log:.2f}s ---")
         asyncio.create_task(classify_question_background(new_log.id, message))
+        asyncio.create_task(detect_intent_background(session_id, message))
+        asyncio.create_task(generate_session_summary_background(session_id))
 
     except Exception as e:
         print(f"--- [ERROR] DB Save failed: {e} ---")
@@ -874,19 +973,30 @@ async def submit_lead(payload: LeadSubmitRequest, db: Session = Depends(get_db))
     Starts as pending (is_approved=False) until admin approves.
     """
     existing = db.query(models.Lead).filter(models.Lead.session_id == payload.session_id).first()
+    
     if existing:
         existing.phone_number = payload.phone_number
         existing.question_count = payload.question_count
-        # Don't override asked_about_price/reg — managed by LLM in background
+        
+        # Update the new fields if provided in the payload
+        if payload.is_registered is not None:
+            existing.is_registered = payload.is_registered
+        if payload.city is not None:
+            existing.city = payload.city
+            
+        # Don't override asked_about_price/reg - managed by LLM in background
         existing.lead_status = _compute_lead_status(
             payload.question_count, existing.asked_about_price, existing.asked_about_registration
         )
         db.commit()
         return {"status": "updated", "lead_id": existing.id}
 
+    # Create new lead if it doesn't exist
     lead = models.Lead(
         session_id=payload.session_id,
         phone_number=payload.phone_number,
+        is_registered=payload.is_registered,  # New field
+        city=payload.city,                    # New field
         question_count=payload.question_count,
         asked_about_price=False,
         asked_about_registration=False,
@@ -895,9 +1005,11 @@ async def submit_lead(payload: LeadSubmitRequest, db: Session = Depends(get_db))
         ),
         is_approved=False,
     )
+    
     db.add(lead)
     db.commit()
     db.refresh(lead)
+    
     return {"status": "created", "lead_id": lead.id}
 
 
@@ -1367,10 +1479,17 @@ async def run_migrations():
         ("leads",      "is_approved", "BOOLEAN DEFAULT 0"),
         ("leads",      "approved_at", "DATETIME"),
         ("leads",      "admin_note",  "TEXT"),
+        ("leads",      "session_summary", "TEXT"),
+
+        ("leads",      "is_registered", "VARCHAR"),
+        ("leads",      "city", "VARCHAR"),
+        ("leads",      "question_count", "INTEGER"),
+
         ("uploaded_reports", "request_id",    "INTEGER"),
         ("uploaded_reports", "report_period", "VARCHAR"),
         ("uploaded_reports", "period_label",  "VARCHAR"),
         ("weekly_notes",     "published_at",  "DATETIME"),
+    
     ]
     with engine.connect() as conn:
         for table, col, col_type in columns:

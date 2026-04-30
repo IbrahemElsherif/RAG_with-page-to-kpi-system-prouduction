@@ -21,29 +21,34 @@ class ChatLog(Base):
 
 class Lead(Base):
     """
-    يُسجَّل تلقائياً لما العميل يدخل رقمه في الـ chat popup.
-    كل حاجة بتبدأ pending=True حتى أنت توافق عليها من الـ trackdashboard.
+    Automatically recorded when the user enters their data in the chat popup.
+    Everything starts with pending=True until approved from the trackdashboard.
     """
     __tablename__ = "leads"
 
     id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(String, index=True)           # ربط بالـ chat session
-    phone_number = Column(String)                     # رقم الموبايل
+    session_id = Column(String, index=True)            # Linked to chat session
+    phone_number = Column(String)                      # Mobile number
+    
+    # New fields added for the frontend dropdowns
+    is_registered = Column(String, nullable=True)      # Expected: 'yes' or 'no'
+    city = Column(String, nullable=True)               # Expected: 'Riyadh', 'Jeddah', etc.
+    
     timestamp = Column(DateTime, default=datetime.utcnow)
 
-    # حقول التحليل التلقائي
-    question_count = Column(Integer, default=0)       # عدد الأسئلة في الـ session
-    asked_about_price = Column(Boolean, default=False)      # سأل عن السعر؟
-    asked_about_registration = Column(Boolean, default=False)  # سأل عن التسجيل؟
+    # Automated analysis fields
+    question_count = Column(Integer, default=0)        # Number of questions in the session
+    asked_about_price = Column(Boolean, default=False)       # Asked about price?
+    asked_about_registration = Column(Boolean, default=False)# Asked about registration?
 
-    # حالة الـ lead (hot/warm/cold) — بتتحسب تلقائي
-    lead_status = Column(String, default="cold")      # hot / warm / cold
+    # Lead status (hot/warm/cold) - calculated automatically
+    lead_status = Column(String, default="cold")       # hot / warm / cold
 
-    # approval system — أنت اللي بتوافق
-    is_approved = Column(Boolean, default=False)      # False = pending، True = ظاهر للمبيعات
-    approved_at = Column(DateTime, nullable=True)     # وقت الموافقة
-    admin_note = Column(Text, nullable=True)          # ملاحظتك الشخصية على الـ lead
-
+    # Approval system - controlled by admin
+    is_approved = Column(Boolean, default=False)       # False = pending, True = visible to sales
+    approved_at = Column(DateTime, nullable=True)      # Approval time
+    admin_note = Column(Text, nullable=True)           # Personal note on the lead
+    session_summary = Column(String, nullable=True)
 
 class WeeklyNote(Base):
     """
