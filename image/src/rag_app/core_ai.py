@@ -24,12 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CHROMA_PATH_ENV = os.getenv("CHROMA_PATH")
 
 if CHROMA_PATH_ENV:
-    # Relative values resolve against the code directory, not the CWD, so the
-    # store you open never depends on where uvicorn was launched from.
     CHROMA_PATH = Path(CHROMA_PATH_ENV)
-    if not CHROMA_PATH.is_absolute():
-        CHROMA_PATH = BASE_DIR / CHROMA_PATH
-    CHROMA_PATH = CHROMA_PATH.resolve()
 else:
     CHROMA_PATH = BASE_DIR / "data" / "chroma_db"
 
@@ -444,7 +439,7 @@ async def prepare_rag_context(message: str, history: List[Tuple[str, str]]):
                 You MUST reply in that exact language — if English, reply in English only.
                 If Arabic, reply in Arabic only. Never mix languages.
                 2. If asked about a city not in the list, apologize and mention available branches.
-                3. For pricing or registration questions, share: unified number 920012673 and WhatsApp 0531809939.
+                3. For pricing or registration questions, share: unified number 920012673 and WhatsApp 0530287098.
                 4. Be direct and concise.
 
                 User: {message}

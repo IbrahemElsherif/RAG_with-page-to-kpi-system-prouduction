@@ -61,11 +61,11 @@ docker compose up         # http://localhost:8081
 The image tag comes from `$TAG`, defaulting to `v3`. **Set it once per shell session** —
 the syntax differs, and the inline `TAG=v4 docker ...` form works only in bash:
 
-| Shell | Command |
-|---|---|
-| cmd.exe | `set TAG=v4` |
+| Shell      | Command             |
+| ---------- | ------------------- |
+| cmd.exe    | `set TAG=v4`      |
 | PowerShell | `$env:TAG = "v4"` |
-| bash / WSL | `export TAG=v4` |
+| bash / WSL | `export TAG=v4`   |
 
 Confirm it took effect before building — this prints the tag compose will actually use:
 
